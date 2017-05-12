@@ -191,9 +191,13 @@ ScreenshotReporter.prototype.getJasmine2Reporter = function() {
             result.started = nowString();
 
             afterEach(function() {
-                browser.manage().logs().get('browser').then(function (browserLogs) {
-                    result.browserLogs = browserLogs;
-                    result.browserLogs.concat(browserLogs);
+                browser.getCapabilities().then(function(capabilities) {
+                    if (capabilities.browserName === "chrome") {
+                        browser.manage().logs().get('browser').then(function (browserLogs) {
+                            result.browserLogs = browserLogs;
+                            result.browserLogs.concat(browserLogs);
+                        })
+                    }
                 })
             })
         },
