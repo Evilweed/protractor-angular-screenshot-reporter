@@ -179,128 +179,169 @@ function ScreenshotReporter(options) {
     }
 }
 
+class Jasmine2Reporter {
+
+    constructor({screenshotReporter}) {
+
+        /* `_asyncFlow` is a promise.
+         * It is a "flow" that we create in `specDone`.
+         * `suiteDone`, `suiteStarted` and `specStarted` will then add their steps to the flow and the `beforeEach`
+         * function will wait for the flow to finish before running the next spec. */
+        this._asyncFlow = Promise.resolve();
+
+        this._screenshotReporter = screenshotReporter;
+        this._suiteNames = [];
+
+    }
+
+    jasmineStarted() {
+
+        /* Register `beforeEach. */
+        beforeEach(() => this._beforeEach());
+
+    }
+
+    suiteStarted(result) {
+        this._asyncFlow = this._asyncFlow
+            .then(() => this._suiteNames.push(result.description));
+    }
+
+    suiteDone(result) {
+        this._asyncFlow = this._asyncFlow
+            .then(() => this._suiteNames.pop());
+    }
+
+    specStarted(result) {
+        this._asyncFlow = this._asyncFlow
+            .then(() => result.started = nowString());
+    }
+
+    specDone(result) {
+        this._asyncFlow = this._asyncSpecDone(result);
+    }
+
+    /* @hack: `beforeEach` waits for `specDone` task to finish before running the next spec.*/
+    async _beforeEach() {
+        await this._asyncFlow;
+        this._asyncFlow = Promise.resolve();
+    }
+
+    async _asyncSpecDone(result) {
+
+        result.stopped = nowString();
+
+        await this._gatherBrowserLogs(result);
+        await this._takeScreenShotAndAddMetaData(result);
+
+    }
+
+    async _gatherBrowserLogs(result) {
+
+        if (!this._screenshotReporter.gatherBrowserLogs) {
+            return;
+        }
+
+        const capabilities = await browser.getCapabilities();
+        const browserName = capabilities.get('browserName');
+
+        /* Skip incompatible browsers. */
+        if (browserName == null || !browserName.toLowerCase().match(/chrome/)) {
+            return;
+        }
+
+        result.browserLogs = await browser.manage().logs().get('browser');
+
+    }
+
+    async _takeScreenShotAndAddMetaData(result) {
+
+        const capabilities = await browser.getCapabilities();
+        const suite = this._buildSuite();
+
+        var descriptions = util.gatherDescriptions(
+            suite,
+            [result.description]
+            ),
+
+            baseName = this._screenshotReporter.pathBuilder(
+                null,
+                descriptions,
+                result,
+                capabilities
+            ),
+
+            metaData = this._screenshotReporter.jasmine2MetaDataBuilder(
+                null,
+                descriptions,
+                result,
+                capabilities
+            ),
+
+            screenShotFileName = path.basename(baseName + '.png'),
+            screenShotFilePath = path.join(path.dirname(baseName + '.png'), this._screenshotReporter.screenshotsSubfolder),
+
+            metaFile = baseName + '.json',
+            screenShotPath = path.join(this._screenshotReporter.baseDirectory, screenShotFilePath, screenShotFileName),
+            metaDataPath = path.join(this._screenshotReporter.baseDirectory, metaFile),
+            jsonPartsPath = path.join(this._screenshotReporter.baseDirectory, path.dirname(metaFile), this._screenshotReporter.jsonsSubfolder, path.basename(metaFile)),
+
+            // pathBuilder can return a subfoldered path too. So extract the
+            // directory path without the baseName
+            directory = path.dirname(screenShotPath),
+            jsonsDirectory = path.dirname(jsonPartsPath);
+
+        metaData.browserLogs = [];
+
+        if (!(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')) {
+            metaData.screenShotFile = path.join(this._screenshotReporter.screenshotsSubfolder, screenShotFileName);
+        }
+
+        if (result.browserLogs) { metaData.browserLogs = result.browserLogs };
+        metaData.duration = new Date(result.stopped) - new Date(result.started);
+
+        if ((result.status != 'pending' && result.status != 'disabled') && !(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')) {
+            try {
+                const png = await browser.takeScreenshot();
+                util.storeScreenShot(png, screenShotPath);
+                util.storeMetaData(metaData, jsonPartsPath, descriptions);
+                util.addMetaData(metaData, metaDataPath, this._screenshotReporter.finalOptions);
+            }
+            catch (e) {
+                console.warn('Could not store Meta Data or add Meta Data to combined.js and generate report');
+                throw e;
+            }
+        } else {
+            util.storeMetaData(metaData, jsonPartsPath, descriptions);
+            util.addMetaData(metaData, metaDataPath, this._screenshotReporter.finalOptions);
+        }
+
+    }
+
+    // Enabling backwards-compat.  Construct Jasmine v1 style spec.suite.
+    _buildSuite() {
+
+        const buildSuite = (suiteNames, i) => {
+            if(i<0) {return null;}
+            return {
+                description: suiteNames[i],
+                parentSuite: buildSuite(suiteNames, i-1)
+            };
+        };
+
+        return buildSuite(this._suiteNames, this._suiteNames.length);
+
+    }
+
+}
+
 /**
  * Returns a reporter that complies with the new Jasmine 2.x custom_reporter.js spec:
  * http://jasmine.github.io/2.1/custom_reporter.html
  */
 ScreenshotReporter.prototype.getJasmine2Reporter = function() {
-    var self = this;
 
-    return {
-        suiteNames: [],
-        suiteStarted: function(result){
-            this.suiteNames.push(result.description);
-        },
-        specStarted: function (result) {
-            result.started = nowString();
+    return new Jasmine2Reporter({screenshotReporter: this});
 
-            afterEach(function() {
-                if (self.gatherBrowserLogs) {
-                    browser.driver.getCapabilities().then(function(caps){
-                        browserName = caps.get('browserName');
-                        if (browserName && browserName.toLowerCase().indexOf('chrome') > -1) {
-                            browser.manage().logs().get('browser').then(function (browserLogs) {
-                                result.browserLogs = [];
-                                result.browserLogs = browserLogs;
-                            })
-                        }
-                    });
-                }
-            })
-        },
-        suiteDone: function(){
-            this.suiteNames.pop();
-        },
-
-        specDone: function(result) {
-            self2 = this;
-            return new Promise( function (resolve, reject) {
-                    result.stopped = nowString();
-
-                    // Enabling backwards-compat.  Construct Jasmine v1 style spec.suite.
-                    function buildSuite(suiteNames, i) {
-                        if(i<0) {return null;}
-                        return {
-                            description: suiteNames[i],
-                            parentSuite: buildSuite(suiteNames, i-1)
-                        };
-                    }
-
-                    var suite = buildSuite(self2.suiteNames, self2.suiteNames.length-1);
-
-                    browser.getCapabilities().then(function (capabilities) {
-                        var descriptions = util.gatherDescriptions(
-                            suite,
-                            [result.description]
-                            ),
-
-                            baseName = self.pathBuilder(
-                                null,
-                                descriptions,
-                                result,
-                                capabilities
-                            ),
-
-                            metaData = self.jasmine2MetaDataBuilder(
-                                null,
-                                descriptions,
-                                result,
-                                capabilities
-                            ),
-
-                            screenShotFileName = path.basename(baseName + '.png'),
-                            screenShotFilePath = path.join(path.dirname(baseName + '.png'), self.screenshotsSubfolder),
-
-                            metaFile = baseName + '.json',
-                            screenShotPath = path.join(self.baseDirectory, screenShotFilePath, screenShotFileName),
-                            metaDataPath = path.join(self.baseDirectory, metaFile),
-                            jsonPartsPath = path.join(self.baseDirectory, path.dirname(metaFile), self.jsonsSubfolder, path.basename(metaFile)),
-
-                            // pathBuilder can return a subfoldered path too. So extract the
-                            // directory path without the baseName
-                            directory = path.dirname(screenShotPath),
-                            jsonsDirectory = path.dirname(jsonPartsPath);
-
-                        metaData.browserLogs = [];
-
-                        if (!(self.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')) {
-                            metaData.screenShotFile = path.join(self.screenshotsSubfolder, screenShotFileName);
-                        }
-
-                        if (result.browserLogs) { metaData.browserLogs = result.browserLogs };
-                        metaData.duration = new Date(result.stopped) - new Date(result.started);
-
-                        if ((result.status != 'pending' && result.status != 'disabled') && !(self.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')) {
-                            browser.takeScreenshot().then(function (png) {
-                                util.storeScreenShot(png, screenShotPath);
-                                util.storeMetaData(metaData, jsonPartsPath, descriptions);
-                                util.addMetaData(metaData, metaDataPath, self.finalOptions);
-                                resolve();
-                            }).catch(function(e) {
-                                console.warn('Could not store Meta Data or add Meta Data to combined.js and generate report');
-                                console.warn(e);
-                                reject();
-                            });
-                        } else {
-                            util.storeMetaData(metaData, jsonPartsPath, descriptions);
-                            util.addMetaData(metaData, metaDataPath, self.finalOptions);
-                            resolve();
-                        }
-
-                    }).catch(function(e) {
-                        console.warn('Something went wrong:');
-                        console.warn(e);
-                        reject();
-                    });
-
-                }
-            ).catch(function(err) {
-                console.warn(err);
-                return Promise.reject(err)
-            })
-
-        }
-    };
 };
 
 
