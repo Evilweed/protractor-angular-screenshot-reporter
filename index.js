@@ -187,7 +187,7 @@ class Jasmine2Reporter {
          * It is a "flow" that we create in `specDone`.
          * `suiteDone`, `suiteStarted` and `specStarted` will then add their steps to the flow and the `beforeEach`
          * function will wait for the flow to finish before running the next spec. */
-        this._asyncFlow = Promise.resolve();
+        this._asyncFlow = null;
 
         this._screenshotReporter = screenshotReporter;
         this._suiteNames = [];
@@ -196,34 +196,44 @@ class Jasmine2Reporter {
 
     jasmineStarted() {
 
-        /* Register `beforeEach. */
+        /* Register `beforeEach` that will wait for all tasks in flow to be finished. */
         beforeEach(() => this._beforeEach());
 
     }
 
     suiteStarted(result) {
-        this._asyncFlow = this._asyncFlow
-            .then(() => this._suiteNames.push(result.description));
+        this._addTaskToFlow(async () => this._suiteNames.push(result.description));
     }
 
     suiteDone(result) {
-        this._asyncFlow = this._asyncFlow
-            .then(() => this._suiteNames.pop());
+        this._addTaskToFlow(async () => this._suiteNames.pop());
     }
 
     specStarted(result) {
-        this._asyncFlow = this._asyncFlow
-            .then(() => result.started = nowString());
+        this._addTaskToFlow(async () => result.started = nowString());
     }
 
     specDone(result) {
-        this._asyncFlow = this._asyncSpecDone(result);
+        this._addTaskToFlow(async () => this._asyncSpecDone(result));
+    }
+
+    _addTaskToFlow(callback) {
+
+        /* Create. */
+        if (this._asyncFlow == null) {
+            this._asyncFlow = callback();
+        }
+        /* Chain. */
+        else {
+            this._asyncFlow = this._asyncFlow.then(callback);
+        }
+
     }
 
     /* @hack: `beforeEach` waits for `specDone` task to finish before running the next spec.*/
     async _beforeEach() {
         await this._asyncFlow;
-        this._asyncFlow = Promise.resolve();
+        this._asyncFlow = null;
     }
 
     async _asyncSpecDone(result) {
@@ -300,20 +310,12 @@ class Jasmine2Reporter {
         metaData.duration = new Date(result.stopped) - new Date(result.started);
 
         if ((result.status != 'pending' && result.status != 'disabled') && !(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')) {
-            try {
-                const png = await browser.takeScreenshot();
-                util.storeScreenShot(png, screenShotPath);
-                util.storeMetaData(metaData, jsonPartsPath, descriptions);
-                util.addMetaData(metaData, metaDataPath, this._screenshotReporter.finalOptions);
-            }
-            catch (e) {
-                console.warn('Could not store Meta Data or add Meta Data to combined.js and generate report');
-                throw e;
-            }
-        } else {
-            util.storeMetaData(metaData, jsonPartsPath, descriptions);
-            util.addMetaData(metaData, metaDataPath, this._screenshotReporter.finalOptions);
+            const png = await browser.takeScreenshot();
+            util.storeScreenShot(png, screenShotPath);
         }
+
+        util.storeMetaData(metaData, jsonPartsPath, descriptions);
+        util.addMetaData(metaData, metaDataPath, this._screenshotReporter.finalOptions);
 
     }
 
