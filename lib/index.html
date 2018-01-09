@@ -177,6 +177,7 @@
         <th>Screen</th>
     </tr>
     </thead>
+    <a>
     <tbody ng-repeat="result in ctrl.results | bySearchSettings:searchSettings">
     <!-- Test Spec Header -->
     <tr ng-if="result.displaySpecName">
@@ -192,10 +193,12 @@
 
     <tr ng-class="{danger: !result.passed && !result.pending, warning: result.pending}">
         <td class="smallColumn status" ng-if="result.passed && !result.pending">
-            <span class="label label-success"><span class="glyphicon glyphicon-ok"></span></span>
+            <span class="label label-success">
+                <span class="glyphicon glyphicon-ok"></span>
+            </span>
         </td>
         <td class="smallColumn status" ng-if="!result.passed && !result.pending">
-            <span class="label label-danger"><span class="glyphicon glyphicon-remove"></span></span>
+            <span class="label label-danger" data-toggle="collapse" data-target="#summary"><span class="glyphicon glyphicon-remove"></span></span> 
         </td>
         <td class="smallColumn status" ng-if="result.pending">
             <span class="label label-warning"><span class="glyphicon glyphicon-option-horizontal"></span></span>
@@ -207,7 +210,7 @@
         <td ng-show="ctrl.displayBrowser">{{result.browser.name}} {{result.browser.version}}</td>
         <td ng-show="ctrl.displaySessionId">{{result.sessionId}}</td>
         <td ng-show="ctrl.displayOS">{{result.os}}</td>
-        <td>{{result.message}}</td>
+        <td><strong>{{result.message}}</strong></td>
         <td class="logColumn">
             <!--<button class="btn btn-warning pull-right" data-toggle="modal" data-target="#modal{{$index}}" ng-if="result.logWarnings > 0">{{result.logWarnings}}</button>-->
             <!--<button class="btn btn-danger pull-right" data-toggle="modal" data-target="#modal{{$index}}" ng-if="result.logErrors > 0">{{result.logErrors}}</button>-->
@@ -266,7 +269,8 @@
                 </span>
                 <a href="" ng-if="ctrl.inlineScreenshots && result.screenShotFile" data-toggle="modal" data-target="#imageModal{{$index}}">
                     <img ng-src="{{result.screenShotFile}}" style="max-width: 100%"/></a>
-                <!-- Screenshot Modal -->
+                
+                 <!-- Screenshot Modal -->
                 <div class="modal" id="imageModal{{$index}}" tabindex="-1" role="dialog"
                      aria-labelledby="imageModalLabel{{$index}}">
                     <div class="modal-dialog modal-lg" role="document">
@@ -307,7 +311,10 @@
             </div>
         </td>
     </tr>
-    </tbody>
+    <tr id="summary" class="collapse">
+        <td>[What do you Expect to see here?]</td>
+    </tr>
+    </tbody></a>
 </table>
 {{ctrl.currentParent = "";""}}
 <script>
