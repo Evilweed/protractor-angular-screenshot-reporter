@@ -177,7 +177,6 @@
         <th>Screen</th>
     </tr>
     </thead>
-    <a>
     <tbody ng-repeat="result in ctrl.results | bySearchSettings:searchSettings">
     <!-- Test Spec Header -->
     <tr ng-if="result.displaySpecName">
@@ -314,7 +313,7 @@
     <tr id="summary" class="collapse">
         <td>[What do you Expect to see here?]</td>
     </tr>
-    </tbody></a>
+    </tbody>
 </table>
 {{ctrl.currentParent = "";""}}
 <script>
