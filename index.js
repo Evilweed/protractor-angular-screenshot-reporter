@@ -2,7 +2,7 @@ module.exports =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-/******/
+
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/
@@ -76,7 +76,8 @@ var core = __webpack_require__(26);
 var hide = __webpack_require__(14);
 var redefine = __webpack_require__(15);
 var ctx = __webpack_require__(23);
-var PROTOTYPE = 'prototype';
+var PROTOTYPE = 'prototype'
+
 
 var $export = function (type, name, source) {
   var IS_FORCED = type & $export.F;
@@ -103,6 +104,8 @@ var $export = function (type, name, source) {
     if (IS_PROTO && expProto[key] != out) expProto[key] = out;
   }
 };
+const globals = require('protractor');
+browser = globals.browser
 global.core = core;
 // type bitmap
 $export.F = 1;   // forced
