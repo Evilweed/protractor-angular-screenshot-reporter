@@ -59,7 +59,7 @@ function addHTMLReport(jsonData, baseName, options){
             streamHtml.write(
                 fs.readFileSync(htmlInFile)
                     .toString()
-                    .replace('<!-- Here will be CSS placed -->', '<link rel="stylesheet" href="'+cssLink+'">')
+                    .replace('<!-- Here will be CSS placed -->', '<link rel="stylesheet" href="'+cssLink.replace(/\\/, '/')+'">')
                     .replace('<!-- Here goes title -->', options.docTitle)
             );
 
