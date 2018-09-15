@@ -1,5 +1,6 @@
 var referenceTestResults = results;
 var testDataBackup;
+var tzOffset = new Date().getTimezoneOffset();
 describe('unit tests', function () {
     describe('reportingApp', function () {
 
@@ -87,13 +88,13 @@ describe('unit tests', function () {
                     expect(controller.round('9880.9999', 3)).toEqual('9.881');
                 });
 
-                it('convertTimestamp handles all cases', function () {
+                it('convertTimestamp handles all AM/PM cases in TZ ' + tzOffset, function () {
                     var $scope = $rootScope.$new();
                     var controller = $controller('ScreenshotReportController', {$scope: $scope});
-                    var offset = new Date().getTimezoneOffset();
+
                     expect(timeData).toBeDefined();
-                    var refSet = timeData[offset];
-                    expect(refSet).toBeDefined("No reference data for timezoneOffset "+offset);
+                    var refSet = timeData[tzOffset]; // timezoneoffset
+                    expect(refSet).toBeDefined("No reference data for timezoneOffset " + tzOffset);
                     expect(controller.convertTimestamp(1534696710055)).toEqual(refSet["1534696710055"]); // 2018-08-19, 6:38 PM
                     expect(controller.convertTimestamp(1534396700055)).toEqual(refSet["1534396700055"]); // e.g. "2018-08-16, 7:18 AM"
                     expect(controller.convertTimestamp(1543618800000)).toEqual(refSet["1543618800000"]); //e.g. "2018-12-01, 12:00 AM"
