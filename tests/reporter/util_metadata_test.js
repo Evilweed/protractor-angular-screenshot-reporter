@@ -360,7 +360,7 @@ describe('unit tests', () => {
                     util.addMetaData(metaData, fakePath, options);
 
                     expect(console.error).not.toHaveBeenCalled();
-                    expect(htmlContents).toEqual('<link rel=\"stylesheet\" href=\"assets\\bootstrap.css\">');
+                    expect(htmlContents).toEqual('<link rel=\"stylesheet\" href=\"assets/bootstrap.css\">');
                 });
 
                 it('replaces stylesheet with custom file in template addHTMLReport', () => {
