@@ -4560,16 +4560,31 @@ function defaultMetaDataBuilder(spec, descriptions, results, capabilities) {
 }
 
 function jasmine2MetaDataBuilder(spec, descriptions, results, capabilities) {
+    var tryGetCapability = function tryGetCapability(capname) {
+        try {
+            return capabilities.get(capname);
+        } catch (e) {
+            if (e) {
+                if (typeof e.toString === 'function' && e.toString() !== "[object Object]") {
+                    return e.toString().substr(0, 32);
+                }
+                if (e.message && typeof e.message === "string") {
+                    return e.message;
+                }
+            }
+            return "Failed: getting " + capname;
+        }
+    };
     var metaData = {
         description: descriptions.join(' '),
         passed: results.status === 'passed',
         pending: results.status === 'pending' || results.status === 'disabled',
-        os: capabilities.get('platform'),
-        sessionId: capabilities.get('webdriver.remote.sessionid'),
+        os: tryGetCapability('platform'),
+        sessionId: tryGetCapability('webdriver.remote.sessionid'),
         instanceId: process.pid,
         browser: {
-            name: capabilities.get('browserName'),
-            version: capabilities.get('version')
+            name: tryGetCapability('browserName'),
+            version: tryGetCapability('version')
         }
     };
 
@@ -4963,7 +4978,8 @@ var Jasmine2Reporter = function () {
 
                                 if (result.browserLogs) {
                                     metaData.browserLogs = result.browserLogs;
-                                };
+                                }
+                                ;
                                 metaData.timestamp = new Date(result.started).getTime();
                                 metaData.duration = new Date(result.stopped) - new Date(result.started);
 
@@ -5048,6 +5064,10 @@ function nowString() {
 }
 
 module.exports = ScreenshotReporter;
+
+// if(Math.floor((Math.random() * 2))===1) {
+//     throw new Error("X");
+// }
 
 /***/ }),
 /* 140 */
@@ -5152,7 +5172,7 @@ function addHTMLReport(jsonData, baseName, options){
             streamHtml.write(
                 fs.readFileSync(htmlInFile)
                     .toString()
-                    .replace('<!-- Here will be CSS placed -->', '<link rel="stylesheet" href="'+cssLink+'">')
+                    .replace('<!-- Here will be CSS placed -->', '<link rel="stylesheet" href="'+cssLink.replace(/\\/, '/')+'">')
                     .replace('<!-- Here goes title -->', options.docTitle)
             );
 

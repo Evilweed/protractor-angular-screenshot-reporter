@@ -52,16 +52,16 @@ function defaultMetaDataBuilder(spec, descriptions, results, capabilities) {
         }
     };
 
-    if(results.items_.length > 0) {
+    if (results.items_.length > 0) {
         var result = results.items_[0];
-        if(!results.passed()){
-            var failedItem = _.where(results.items_,{passed_: false})[0];
-            if(failedItem){
+        if (!results.passed()) {
+            var failedItem = _.where(results.items_, {passed_: false})[0];
+            if (failedItem) {
                 metaData.message = failedItem.message || 'Failed';
-                metaData.trace = failedItem.trace? (failedItem.trace.stack || 'No Stack trace information') : 'No Stack trace information';
+                metaData.trace = failedItem.trace ? (failedItem.trace.stack || 'No Stack trace information') : 'No Stack trace information';
             }
 
-        }else{
+        } else {
             metaData.message = result.message || 'Passed';
             metaData.trace = result.trace.stack;
         }
@@ -71,25 +71,41 @@ function defaultMetaDataBuilder(spec, descriptions, results, capabilities) {
     return metaData;
 }
 
-
 function jasmine2MetaDataBuilder(spec, descriptions, results, capabilities) {
+    var tryGetCapability = function (capname) {
+        try {
+            return capabilities.get(capname);
+
+        } catch (e) {
+            if (e) {
+                if (typeof e.toString === 'function' && e.toString() !== "[object Object]") {
+                    return e.toString().substr(0, 32);
+                }
+                if (e.message && typeof e.message === "string") {
+                    return e.message;
+                }
+            }
+            return "Failed: getting "+capname;
+        }
+
+    };
     var metaData = {
-        description: descriptions.join(' '),
+        description:  descriptions.join(' '),
         passed: results.status === 'passed',
         pending: results.status === 'pending' || results.status === 'disabled',
-        os: capabilities.get('platform'),
-        sessionId: capabilities.get('webdriver.remote.sessionid'),
+        os: tryGetCapability('platform'),
+        sessionId: tryGetCapability('webdriver.remote.sessionid'),
         instanceId: process.pid,
         browser: {
-            name: capabilities.get('browserName'),
-            version: capabilities.get('version')
+            name: tryGetCapability('browserName'),
+            version: tryGetCapability('version')
         }
     };
 
-    if(results.status === 'passed') {
+    if (results.status === 'passed') {
         metaData.message = (results.passedExpectations[0] || {}).message || 'Passed';
         metaData.trace = (results.passedExpectations[0] || {}).stack;
-    } else if(results.status === 'pending' || results.status === 'disabled') {
+    } else if (results.status === 'pending' || results.status === 'disabled') {
         metaData.message = results.pendingReason || 'Pending';
     } else {
 
@@ -121,7 +137,6 @@ function sortFunction(a, b) {
 }
 
 
-
 /** Class: ScreenshotReporter
  * Creates a new screenshot reporter using the given `options` object.
  *
@@ -145,26 +160,26 @@ function sortFunction(a, b) {
  */
 function ScreenshotReporter(options) {
     options = options || {};
-    if(!options.baseDirectory || options.baseDirectory.length === 0) {
+    if (!options.baseDirectory || options.baseDirectory.length === 0) {
         throw new Error('Please pass a valid base directory to store the ' +
             'screenshots into.');
     } else {
         this.baseDirectory = options.baseDirectory;
     }
 
-    if(typeof (options.cssOverrideFile) !== 'undefined' && _.isString(options.cssOverrideFile) ){
+    if (typeof (options.cssOverrideFile) !== 'undefined' && _.isString(options.cssOverrideFile)) {
         this.cssOverrideFile = options.cssOverrideFile;
     } else {
         this.cssOverrideFile = null;
     }
 
-    if(typeof (options.screenshotsSubfolder) !== 'undefined' &&  _.isString(options.screenshotsSubfolder) ){
+    if (typeof (options.screenshotsSubfolder) !== 'undefined' && _.isString(options.screenshotsSubfolder)) {
         this.screenshotsSubfolder = options.screenshotsSubfolder;
     } else {
         this.screenshotsSubfolder = '';
     }
 
-    if(typeof (options.jsonsSubfolder) !== 'undefined' &&  _.isString(options.jsonsSubfolder) ){
+    if (typeof (options.jsonsSubfolder) !== 'undefined' && _.isString(options.jsonsSubfolder)) {
         this.jsonsSubfolder = options.jsonsSubfolder;
     } else {
         this.jsonsSubfolder = '';
@@ -203,7 +218,7 @@ function ScreenshotReporter(options) {
         columnSettings: this.columnSettings
     };
 
-    if(!this.preserveDirectory){
+    if (!this.preserveDirectory) {
         util.removeDirectory(this.finalOptions.baseDirectory);
     }
 }
@@ -330,14 +345,16 @@ class Jasmine2Reporter {
             jsonPartsPath = path.join(this._screenshotReporter.baseDirectory, path.dirname(metaFile), this._screenshotReporter.jsonsSubfolder, path.basename(metaFile));
 
 
-
         metaData.browserLogs = [];
 
         if (!(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')) {
             metaData.screenShotFile = path.join(this._screenshotReporter.screenshotsSubfolder, screenShotFileName);
         }
 
-        if (result.browserLogs) { metaData.browserLogs = result.browserLogs };
+        if (result.browserLogs) {
+            metaData.browserLogs = result.browserLogs
+        }
+        ;
         metaData.timestamp = new Date(result.started).getTime();
         metaData.duration = new Date(result.stopped) - new Date(result.started);
 
@@ -356,10 +373,12 @@ class Jasmine2Reporter {
     _buildSuite() {
 
         const buildSuite = (suiteNames, i) => {
-            if(i<0) {return null;}
+            if (i < 0) {
+                return null;
+            }
             return {
                 description: suiteNames[i],
-                parentSuite: buildSuite(suiteNames, i-1)
+                parentSuite: buildSuite(suiteNames, i - 1)
             };
         };
 
@@ -373,12 +392,11 @@ class Jasmine2Reporter {
  * Returns a reporter that complies with the new Jasmine 2.x custom_reporter.js spec:
  * http://jasmine.github.io/2.1/custom_reporter.html
  */
-ScreenshotReporter.prototype.getJasmine2Reporter = function() {
+ScreenshotReporter.prototype.getJasmine2Reporter = function () {
 
     return new Jasmine2Reporter({screenshotReporter: this});
 
 };
-
 
 
 /** Function: reportSpecResults
@@ -395,3 +413,7 @@ function nowString() {
 }
 
 module.exports = ScreenshotReporter;
+
+// if(Math.floor((Math.random() * 2))===1) {
+//     throw new Error("X");
+// }
