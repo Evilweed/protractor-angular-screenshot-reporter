@@ -10,7 +10,6 @@
   "unused": true,
   "trailing": true,
   "maxdepth": 3,
-  "maxlen": 140,
   "laxcomma": true,
   "esnext": true,
   "jasmine": true,
