@@ -10,7 +10,6 @@
   "unused": true,
   "trailing": true,
   "maxdepth": 3,
-  "maxlen": 140,
   "laxcomma": true,
   "esnext": true,
   "jasmine": true,
@@ -19,6 +18,7 @@
   "globals": {
     "referenceTestResults": true,
     "angular": true,
-    "inject": true
+    "inject": true,
+    "CircularJSON":true
   }
 }

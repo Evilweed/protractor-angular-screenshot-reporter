@@ -13,7 +13,6 @@ module.exports = function (config) {
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
         frameworks: ['jasmine'],
 
-
         // list of files / patterns to load in the browser
         files: [
             'lib/assets/angular.min.js',
@@ -24,6 +23,7 @@ module.exports = function (config) {
             'lib/assets/buttons.js',
             'tmp/tests/lib/app.js',
             'tests/app/test_data.js',
+            'tests/app/time_data.js',
             'tests/app/app_test.js'
         ],
 

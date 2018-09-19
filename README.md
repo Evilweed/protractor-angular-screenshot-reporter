@@ -22,6 +22,9 @@
 Need some feature? Let me know or code it and propose Pull Request :)
 But you might also look in our [WIKI](https://github.com/Evilweed/protractor-beautiful-reporter/wiki)/FAQ where we present some solutions how you can enhance the reporter by yourself.
 
+## Known Limits
+Does not work with `protractor-retry` or `protractor-flake`. The collection of results currently assumes only one `continuous` run.
+
 ## Props
 
 This is built on top of [protractor-angular-screenshot-reporter](https://github.com/bcole/protractor-angular-screenshot-reporter), which is built on top of [protractor-html-screenshot-reporter](https://github.com/jintoppy/protractor-html-screenshot-reporter), which is built on top of [protractor-screenshot-reporter](https://github.com/swissmanu/protractor-screenshot-reporter).
@@ -303,12 +306,14 @@ Default is `true`.
  ```javascript
  new HtmlReporter({
     baseDirectory: 'tmp/screenshots'
-    , searchSettings:{
-        allselected: false,
-        passed: false,
-        failed: true,
-        pending: true,
-        withLog: true
+    , clientDefaults:{
+        searchSettings:{
+            allselected: false,
+            passed: false,
+            failed: true,
+            pending: true,
+            withLog: true
+        }
     }
  });
  ```
@@ -321,12 +326,14 @@ Default is every option is set to `true`
   ```javascript
   new HtmlReporter({
      baseDirectory: 'tmp/screenshots'
-     , columnSettings:{
-        displayTime:true,
-        displayBrowser:false,
-        displaySessionId:false,
-        inlineScreenshots:false
-     }
+     , clientDefaults:{
+        columnSettings:{
+            displayTime:true,
+            displayBrowser:false,
+            displaySessionId:false,
+            inlineScreenshots:false
+        }
+     }     
   });
   ```
 

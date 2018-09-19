@@ -18,7 +18,7 @@ exports.config = {
     //seleniumServerJar: 'node_modules/protractor/selenium/selenium-server-standalone-2.37.0.jar',
 
     // Address of selenium server (before running protractor, run "webdriver-manager start" to start the Selenium server)
-    seleniumAddress: 'http://localhost:4444/wd/hub',
+    seleniumAddress: process.env.SELENIUMSERVER ? process.env.SELENIUMSERVER : 'http://localhost:4444/wd/hub',
 
     // The port to start the selenium server on, or null if the server should
     // find its own unused port.
@@ -62,7 +62,7 @@ exports.config = {
         maxInstances: 2,
 
         chromeOptions: {
-            args:["--window-size=1680,1000"]
+            args: ["--window-size=1680,1000"]
             // commented out but needed to keep it for local testing
             //     args:["--headless","--disable-gpu","--window-size=1680,1680"]
             //     args:["--headless","--disable-gpu","--force-device-scale-factor=1.75","--high-dpi-support=1.75","--window-size=1400,1680"]
@@ -88,6 +88,11 @@ exports.config = {
             screenshotsSubfolder: 'images',
             jsonsSubfolder: 'jsons',
             baseDirectory: 'reports-tmp',
+            clientDefaults: {
+                columnSettings: {
+                    displaySessionId:false
+                }
+            },
             pathBuilder: function pathBuilder(spec, descriptions, results, capabilities) {
                 // Return '<30-12-2016>/<browser>/<specname>' as path for screenshots:
                 // Example: '30-12-2016/firefox/list-should work'.

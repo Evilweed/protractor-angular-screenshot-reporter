@@ -121,6 +121,7 @@ table {
 
 .message {
     display: block;
+    white-space: pre-wrap;
 }
 
 .message:not(:first-child) {

@@ -11,7 +11,9 @@ jasmine.clearReporters();
 
 const specReporter = new SpecReporter({  // add jasmine-spec-reporter
     spec: {
-        displayPending: true
+        displayPending: true,
+        displayStacktrace:true,
+        displayFailed:true
     },
     summary: {
         displayPending: false

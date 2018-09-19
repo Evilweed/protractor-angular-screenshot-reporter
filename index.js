@@ -4666,8 +4666,15 @@ function ScreenshotReporter(options) {
     this.takeScreenShotsForSkippedSpecs = options.takeScreenShotsForSkippedSpecs || false;
     this.gatherBrowserLogs = options.gatherBrowserLogs || true;
     this.takeScreenShotsOnlyForFailedSpecs = options.takeScreenShotsOnlyForFailedSpecs || false;
-    this.searchSettings = options.searchSettings;
-    this.columnSettings = options.columnSettings;
+    this.clientDefaults = options.clientDefaults;
+    if (options.searchSettings) {
+        //settings in earlier "format" there?
+        options.clientDefaults.searchSettings = options.searchSettings;
+    }
+    if (options.columnSettings) {
+        options.clientDefaults.columnSettings = options.columnSettings;
+    }
+
     this.finalOptions = {
         excludeSkippedSpecs: this.excludeSkippedSpecs,
         takeScreenShotsOnlyForFailedSpecs: this.takeScreenShotsOnlyForFailedSpecs,
@@ -4681,10 +4688,8 @@ function ScreenshotReporter(options) {
         docName: this.docName,
         cssOverrideFile: this.cssOverrideFile,
         prepareAssets: true,
-        searchSettings: this.searchSettings,
-        columnSettings: this.columnSettings
+        clientDefaults: this.clientDefaults
     };
-
     if (!this.preserveDirectory) {
         util.removeDirectory(this.finalOptions.baseDirectory);
     }
@@ -4952,7 +4957,15 @@ var Jasmine2Reporter = function () {
                             case 2:
                                 capabilities = _context8.sent;
                                 suite = this._buildSuite();
-                                descriptions = util.gatherDescriptions(suite, [result.description]), baseName = this._screenshotReporter.pathBuilder(null, descriptions, result, capabilities), metaData = this._screenshotReporter.jasmine2MetaDataBuilder(null, descriptions, result, capabilities), screenShotFileName = path.basename(baseName + '.png'), screenShotFilePath = path.join(path.dirname(baseName + '.png'), this._screenshotReporter.screenshotsSubfolder), metaFile = baseName + '.json', screenShotPath = path.join(this._screenshotReporter.baseDirectory, screenShotFilePath, screenShotFileName), metaDataPath = path.join(this._screenshotReporter.baseDirectory, metaFile), jsonPartsPath = path.join(this._screenshotReporter.baseDirectory, path.dirname(metaFile), this._screenshotReporter.jsonsSubfolder, path.basename(metaFile));
+                                descriptions = util.gatherDescriptions(suite, [result.description]);
+                                baseName = this._screenshotReporter.pathBuilder(null, descriptions, result, capabilities);
+                                metaData = this._screenshotReporter.jasmine2MetaDataBuilder(null, descriptions, result, capabilities);
+                                screenShotFileName = path.basename(baseName + '.png');
+                                screenShotFilePath = path.join(path.dirname(baseName + '.png'), this._screenshotReporter.screenshotsSubfolder);
+                                metaFile = baseName + '.json';
+                                screenShotPath = path.join(this._screenshotReporter.baseDirectory, screenShotFilePath, screenShotFileName);
+                                metaDataPath = path.join(this._screenshotReporter.baseDirectory, metaFile);
+                                jsonPartsPath = path.join(this._screenshotReporter.baseDirectory, path.dirname(metaFile), this._screenshotReporter.jsonsSubfolder, path.basename(metaFile));
 
 
                                 metaData.browserLogs = [];
@@ -4963,30 +4976,31 @@ var Jasmine2Reporter = function () {
 
                                 if (result.browserLogs) {
                                     metaData.browserLogs = result.browserLogs;
-                                };
+                                }
+
                                 metaData.timestamp = new Date(result.started).getTime();
                                 metaData.duration = new Date(result.stopped) - new Date(result.started);
 
                                 if (!(result.status !== 'pending' && result.status !== 'disabled' && !(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed'))) {
-                                    _context8.next = 16;
+                                    _context8.next = 23;
                                     break;
                                 }
 
-                                _context8.next = 14;
+                                _context8.next = 21;
                                 return browser.takeScreenshot();
 
-                            case 14:
+                            case 21:
                                 png = _context8.sent;
 
                                 util.storeScreenShot(png, screenShotPath);
 
-                            case 16:
+                            case 23:
 
                                 util.storeMetaData(metaData, jsonPartsPath, descriptions);
                                 util.addMetaData(metaData, metaDataPath, this._screenshotReporter.finalOptions);
                                 this._screenshotReporter.finalOptions.prepareAssets = false; // signal to utils not to write all files again
 
-                            case 19:
+                            case 26:
                             case 'end':
                                 return _context8.stop();
                         }
@@ -5091,12 +5105,11 @@ define(String.prototype, "padRight", "".padEnd);
 /* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var fs = __webpack_require__(54)
-    , path = __webpack_require__(9)
-    , crypto = __webpack_require__(372)
-    , CircularJSON = __webpack_require__(143)
-    , fse = __webpack_require__(355);
-
+const fs = __webpack_require__(54);
+const path = __webpack_require__(9);
+const crypto = __webpack_require__(372);
+const CircularJSON = __webpack_require__(143);
+const fse = __webpack_require__(355);
 
 
 /** Function: storeScreenShot
@@ -5108,11 +5121,21 @@ var fs = __webpack_require__(54)
  */
 function storeScreenShot(data, file) {
     try {
-        fse.outputFileSync(file, data, {encoding: 'base64'})
-    } catch(e) {
+        fse.outputFileSync(file, data, {encoding: 'base64'});
+    } catch (e) {
         console.error(e);
         console.error('Could not save image: ', file);
     }
+}
+
+function cleanArray(actual) {
+    const newArray = [];
+    for (let i = 0; i < actual.length; i++) {
+        if (actual[i]) {
+            newArray.push(actual[i]);
+        }
+    }
+    return newArray;
 }
 
 /**
@@ -5121,17 +5144,17 @@ function storeScreenShot(data, file) {
  * @param baseName
  * @param options
  */
-function addHTMLReport(jsonData, baseName, options){
-    var basePath = path.dirname(baseName),
-        // Output files
-        htmlFile = path.join(basePath, options.docName),
-        jsFile = path.join(basePath, 'app.js'),
-        // Input files
-        htmlInFile = path.join(__dirname, 'lib', 'index.html'),
-        jsTemplate = path.join(__dirname, 'lib', 'app.js'),
-        streamJs,
-        streamHtml,
-        cssLink = path.join('assets', 'bootstrap.css');
+function addHTMLReport(jsonData, baseName, options) {
+    const basePath = path.dirname(baseName);
+    // Output files
+    const htmlFile = path.join(basePath, options.docName);
+    const jsFile = path.join(basePath, 'app.js');
+    // Input files
+    const htmlInFile = path.join(__dirname, 'lib', 'index.html');
+    const jsTemplate = path.join(__dirname, 'lib', 'app.js');
+    let streamJs;
+    let streamHtml;
+    let cssLink = path.join('assets', 'bootstrap.css').replace(/\\/g,'/');
 
     try {
         if (options.cssOverrideFile) {
@@ -5152,7 +5175,7 @@ function addHTMLReport(jsonData, baseName, options){
             streamHtml.write(
                 fs.readFileSync(htmlInFile)
                     .toString()
-                    .replace('<!-- Here will be CSS placed -->', '<link rel="stylesheet" href="'+cssLink+'">')
+                    .replace('<!-- Here will be CSS placed -->', '<link rel="stylesheet" href="' + cssLink + '">')
                     .replace('<!-- Here goes title -->', options.docTitle)
             );
 
@@ -5162,17 +5185,25 @@ function addHTMLReport(jsonData, baseName, options){
         // Construct app.js
         streamJs = fs.createWriteStream(jsFile);
 
+        //prepare clientDefaults for serializations
+        var jsonDataString;
+        if (options.clientDefaults && options.clientDefaults.useAjax) {
+            jsonDataString = "[]";
+        } else {
+            jsonDataString = JSON.stringify(jsonData, null, 4);
+        }
+
+
         streamJs.write(
             fs.readFileSync(jsTemplate)
                 .toString()
-                .replace('\'<Results Replacement>\'', JSON.stringify(jsonData, null, 4))
-                .replace('\'<Sort Function Replacement>\'', options.sortFunction.toString())
-                .replace('\'<Search Settings Replacement>\'',options.searchSettings?JSON.stringify(options.searchSettings):'{}')
-                .replace('\'<Column Settings Replacement>\'',options.columnSettings?JSON.stringify(options.columnSettings):'undefined')
+                .replace('\[\];//\'<Results Replacement>\'',  jsonDataString)
+                .replace('defaultSortFunction/*<Sort Function Replacement>*/', options.sortFunction.toString())
+                .replace('{};//\'<Client Defaults Replacement>\'', JSON.stringify(options.clientDefaults, null, 4))
         );
 
         streamJs.end();
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         console.error('Could not save combined.js for data: ' + jsonData);
     }
@@ -5181,19 +5212,15 @@ function addHTMLReport(jsonData, baseName, options){
 /**
  * Adds the metaData JSON to combined.json
  * combined.json is a JSON list, containing all metaData.
- * @param metaData the metaData to add to the combined JSON list
- * @param baseName
- * @param descriptions
- * @param options
+ * @param test the metaData to add to the combined JSON list
+ * @param baseName base directory name
+ * @param options reporter options passed through
  */
-function addMetaData(test, baseName, options){
-    var json,
-        basePath = path.dirname(baseName),
-        jsonsDirectory = path.join(basePath,'jsons'),
-        file = path.join(basePath,'combined.json'),
-        lock = path.join(basePath,'.lock'),
-        data = [];
-
+function addMetaData(test, baseName, options) {
+    const basePath = path.dirname(baseName);
+    const file = path.join(basePath, 'combined.json');
+    const lock = path.join(basePath, '.lock');
+    let data = [];
     try {
         // delay if one write operation is pending
         if (fse.pathExistsSync(lock)) {
@@ -5215,15 +5242,15 @@ function addMetaData(test, baseName, options){
         data.push(test);
 
         fse.outputJsonSync(file, CircularJSON.stringify(data));
-        
+
         addHTMLReport(data, baseName, options);
 
         fs.rmdirSync(lock);
 
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         console.error('Could not save JSON for data: ' + test);
-    }    
+    }
 }
 
 /** Function: storeMetaData
@@ -5238,21 +5265,12 @@ function storeMetaData(metaData, file, descriptions) {
     try {
         metaData.description = cleanArray(descriptions).join('|');
         fse.outputJsonSync(file, metaData);
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         console.error('Could not save meta data for ' + file);
     }
 }
 
-function cleanArray(actual) {
-    var newArray = new Array();
-    for (var i = 0; i < actual.length; i++) {
-        if (actual[i]) {
-            newArray.push(actual[i]);
-        }
-    }
-    return newArray;
-}
 
 /** Function: gatherDescriptions
  * Traverses the parent suites of a test spec recursivly and gathers all
@@ -5278,9 +5296,12 @@ function cleanArray(actual) {
  *             itself.
  */
 function gatherDescriptions(suite, soFar) {
-    if (suite.description != null) { soFar.push(suite.description) };
+    if (suite.description != null) { // jshint ignore:line
+        //the != above is intentional: !== would distinguish between null and undefined (and we do not want this)
+        soFar.push(suite.description);
+    }
 
-    if(suite.parentSuite) {
+    if (suite.parentSuite) {
         return gatherDescriptions(suite.parentSuite, soFar);
     } else {
         return soFar;
@@ -5294,33 +5315,41 @@ function gatherDescriptions(suite, soFar) {
  *     (String) containing a guid
  */
 function generateGuid() {
-    var buf = new Uint16Array(8);
+    let buf = new Uint16Array(8);
     buf = crypto.randomBytes(8);
-    var S4 = function(num) {
-        var ret = num.toString(16);
-        while(ret.length < 4){
-            ret = "0"+ret;
+    const S4 = function (num) {
+        let ret = num.toString(16);
+        while (ret.length < 4) {
+            ret = "0" + ret;
         }
         return ret;
     };
 
     return (
-        S4(buf[0])+S4(buf[1])+"-"+S4(buf[2])+"-"+S4(buf[3])+"-"+
-        S4(buf[4])+"-"+S4(buf[5])+S4(buf[6])+S4(buf[7])
+        S4(buf[0]) + S4(buf[1]) + "-" + S4(buf[2]) + "-" + S4(buf[3]) + "-" +
+        S4(buf[4]) + "-" + S4(buf[5]) + S4(buf[6]) + S4(buf[7])
     );
 }
 
-function removeDirectory(dirPath){
-    try { var files = fs.readdirSync(dirPath); }
-    catch(e) { return; }
-    if (files.length > 0)
-        for (var i = 0; i < files.length; i++) {
-            var filePath = dirPath + '/' + files[i];
-            if (fs.statSync(filePath).isFile())
+function removeDirectory(dirPath) {
+    let files;
+    try {
+        files = fs.readdirSync(dirPath);
+    }
+    catch (e) {
+        return;
+    }
+    if (files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+            const filePath = dirPath + '/' + files[i];
+            if (fs.statSync(filePath).isFile()) {
                 fs.unlinkSync(filePath);
-            else
+            }
+            else {
                 removeDirectory(filePath);
+            }
         }
+    }
     fs.rmdirSync(dirPath);
 }
 

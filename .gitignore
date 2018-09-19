@@ -5,3 +5,4 @@ examples/reports-tmp
 npm-debug.log
 .idea/
 tmp/
+.npmrc
