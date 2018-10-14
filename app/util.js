@@ -47,7 +47,7 @@ function addHTMLReport(jsonData, baseName, options) {
     const jsTemplate = path.join(__dirname, 'lib', 'app.js');
     let streamJs;
     let streamHtml;
-    let cssLink = path.join('assets', 'bootstrap.css').replace(/\\/g,'/');
+    let cssLink = path.join('assets', 'bootstrap.css').replace(/\\/g, '/');
 
     try {
         if (options.cssOverrideFile) {
@@ -68,7 +68,7 @@ function addHTMLReport(jsonData, baseName, options) {
             streamHtml.write(
                 fs.readFileSync(htmlInFile)
                     .toString()
-                    .replace('<!-- Here will be CSS placed -->', '<link rel="stylesheet" href="' + cssLink + '">')
+                    .replace('<!-- Here will be CSS placed -->', '<link rel="stylesheet" href="' + cssLink.replace(/\\/, '/') + '">')
                     .replace('<!-- Here goes title -->', options.docTitle)
             );
 
@@ -90,7 +90,7 @@ function addHTMLReport(jsonData, baseName, options) {
         streamJs.write(
             fs.readFileSync(jsTemplate)
                 .toString()
-                .replace('\[\];//\'<Results Replacement>\'',  jsonDataString)
+                .replace('\[\];//\'<Results Replacement>\'', jsonDataString)
                 .replace('defaultSortFunction/*<Sort Function Replacement>*/', options.sortFunction.toString())
                 .replace('{};//\'<Client Defaults Replacement>\'', JSON.stringify(options.clientDefaults, null, 4))
         );

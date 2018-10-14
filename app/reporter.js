@@ -86,10 +86,10 @@ function jasmine2MetaDataBuilder(spec, descriptions, results, capabilities) {
         }
     };
 
-    if (results.status === 'passed') {
+    if(results.status === 'passed') {
         metaData.message = (results.passedExpectations[0] || {}).message || 'Passed';
         metaData.trace = (results.passedExpectations[0] || {}).stack;
-    } else if (results.status === 'pending' || results.status === 'disabled') {
+    } else if(results.status === 'pending' || results.status === 'disabled') {
         metaData.message = results.pendingReason || 'Pending';
     } else {
 
@@ -121,6 +121,7 @@ function sortFunction(a, b) {
 }
 
 
+
 /** Class: ScreenshotReporter
  * Creates a new screenshot reporter using the given `options` object.
  *
@@ -144,26 +145,26 @@ function sortFunction(a, b) {
  */
 function ScreenshotReporter(options) {
     options = options || {};
-    if (!options.baseDirectory || options.baseDirectory.length === 0) {
+    if(!options.baseDirectory || options.baseDirectory.length === 0) {
         throw new Error('Please pass a valid base directory to store the ' +
             'screenshots into.');
     } else {
         this.baseDirectory = options.baseDirectory;
     }
 
-    if (typeof (options.cssOverrideFile) !== 'undefined' && _.isString(options.cssOverrideFile)) {
+    if(typeof (options.cssOverrideFile) !== 'undefined' && _.isString(options.cssOverrideFile) ){
         this.cssOverrideFile = options.cssOverrideFile;
     } else {
         this.cssOverrideFile = null;
     }
 
-    if (typeof (options.screenshotsSubfolder) !== 'undefined' && _.isString(options.screenshotsSubfolder)) {
+    if(typeof (options.screenshotsSubfolder) !== 'undefined' &&  _.isString(options.screenshotsSubfolder) ){
         this.screenshotsSubfolder = options.screenshotsSubfolder;
     } else {
         this.screenshotsSubfolder = '';
     }
 
-    if (typeof (options.jsonsSubfolder) !== 'undefined' && _.isString(options.jsonsSubfolder)) {
+    if(typeof (options.jsonsSubfolder) !== 'undefined' &&  _.isString(options.jsonsSubfolder) ){
         this.jsonsSubfolder = options.jsonsSubfolder;
     } else {
         this.jsonsSubfolder = '';
@@ -339,10 +340,7 @@ class Jasmine2Reporter {
             metaData.screenShotFile = path.join(this._screenshotReporter.screenshotsSubfolder, screenShotFileName);
         }
 
-        if (result.browserLogs) {
-            metaData.browserLogs = result.browserLogs
-        }
-        ;
+        if (result.browserLogs) { metaData.browserLogs = result.browserLogs };
         metaData.timestamp = new Date(result.started).getTime();
         metaData.duration = new Date(result.stopped) - new Date(result.started);
 
@@ -361,9 +359,7 @@ class Jasmine2Reporter {
     _buildSuite() {
 
         const buildSuite = (suiteNames, i) => {
-            if (i < 0) {
-                return null;
-            }
+            if(i<0) {return null;}
             return {
                 description: suiteNames[i],
                 parentSuite: buildSuite(suiteNames, i - 1)
@@ -380,11 +376,12 @@ class Jasmine2Reporter {
  * Returns a reporter that complies with the new Jasmine 2.x custom_reporter.js spec:
  * http://jasmine.github.io/2.1/custom_reporter.html
  */
-ScreenshotReporter.prototype.getJasmine2Reporter = function () {
+ScreenshotReporter.prototype.getJasmine2Reporter = function() {
 
     return new Jasmine2Reporter({screenshotReporter: this});
 
 };
+
 
 
 /** Function: reportSpecResults

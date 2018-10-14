@@ -24,6 +24,7 @@ module.exports = function (config) {
             'lib/assets/buttons.js',
             'tmp/tests/lib/app.js',
             'tests/app/test_data.js',
+            'tests/app/time_data.js',
             'tests/app/app_test.js'
         ],
 
