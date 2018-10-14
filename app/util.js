@@ -1,9 +1,8 @@
-var fs = require('fs')
-    , path = require('path')
-    , crypto = require('crypto')
-    , CircularJSON = require('circular-json')
-    , fse = require('fs-extra');
-
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const CircularJSON = require('circular-json');
+const fse = require('fs-extra');
 
 
 /** Function: storeScreenShot
@@ -15,11 +14,21 @@ var fs = require('fs')
  */
 function storeScreenShot(data, file) {
     try {
-        fse.outputFileSync(file, data, {encoding: 'base64'})
-    } catch(e) {
+        fse.outputFileSync(file, data, {encoding: 'base64'});
+    } catch (e) {
         console.error(e);
         console.error('Could not save image: ', file);
     }
+}
+
+function cleanArray(actual) {
+    const newArray = [];
+    for (let i = 0; i < actual.length; i++) {
+        if (actual[i]) {
+            newArray.push(actual[i]);
+        }
+    }
+    return newArray;
 }
 
 /**
@@ -28,17 +37,17 @@ function storeScreenShot(data, file) {
  * @param baseName
  * @param options
  */
-function addHTMLReport(jsonData, baseName, options){
-    var basePath = path.dirname(baseName),
-        // Output files
-        htmlFile = path.join(basePath, options.docName),
-        jsFile = path.join(basePath, 'app.js'),
-        // Input files
-        htmlInFile = path.join(__dirname, 'lib', 'index.html'),
-        jsTemplate = path.join(__dirname, 'lib', 'app.js'),
-        streamJs,
-        streamHtml,
-        cssLink = path.join('assets', 'bootstrap.css');
+function addHTMLReport(jsonData, baseName, options) {
+    const basePath = path.dirname(baseName);
+    // Output files
+    const htmlFile = path.join(basePath, options.docName);
+    const jsFile = path.join(basePath, 'app.js');
+    // Input files
+    const htmlInFile = path.join(__dirname, 'lib', 'index.html');
+    const jsTemplate = path.join(__dirname, 'lib', 'app.js');
+    let streamJs;
+    let streamHtml;
+    let cssLink = path.join('assets', 'bootstrap.css').replace(/\\/g,'/');
 
     try {
         if (options.cssOverrideFile) {
@@ -59,7 +68,7 @@ function addHTMLReport(jsonData, baseName, options){
             streamHtml.write(
                 fs.readFileSync(htmlInFile)
                     .toString()
-                    .replace('<!-- Here will be CSS placed -->', '<link rel="stylesheet" href="'+cssLink+'">')
+                    .replace('<!-- Here will be CSS placed -->', '<link rel="stylesheet" href="' + cssLink + '">')
                     .replace('<!-- Here goes title -->', options.docTitle)
             );
 
@@ -69,17 +78,25 @@ function addHTMLReport(jsonData, baseName, options){
         // Construct app.js
         streamJs = fs.createWriteStream(jsFile);
 
+        //prepare clientDefaults for serializations
+        var jsonDataString;
+        if (options.clientDefaults && options.clientDefaults.useAjax) {
+            jsonDataString = "[]";
+        } else {
+            jsonDataString = JSON.stringify(jsonData, null, 4);
+        }
+
+
         streamJs.write(
             fs.readFileSync(jsTemplate)
                 .toString()
-                .replace('\'<Results Replacement>\'', JSON.stringify(jsonData, null, 4))
-                .replace('\'<Sort Function Replacement>\'', options.sortFunction.toString())
-                .replace('\'<Search Settings Replacement>\'',options.searchSettings?JSON.stringify(options.searchSettings):'{}')
-                .replace('\'<Column Settings Replacement>\'',options.columnSettings?JSON.stringify(options.columnSettings):'undefined')
+                .replace('\[\];//\'<Results Replacement>\'',  jsonDataString)
+                .replace('defaultSortFunction/*<Sort Function Replacement>*/', options.sortFunction.toString())
+                .replace('{};//\'<Client Defaults Replacement>\'', JSON.stringify(options.clientDefaults, null, 4))
         );
 
         streamJs.end();
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         console.error('Could not save combined.js for data: ' + jsonData);
     }
@@ -88,19 +105,15 @@ function addHTMLReport(jsonData, baseName, options){
 /**
  * Adds the metaData JSON to combined.json
  * combined.json is a JSON list, containing all metaData.
- * @param metaData the metaData to add to the combined JSON list
- * @param baseName
- * @param descriptions
- * @param options
+ * @param test the metaData to add to the combined JSON list
+ * @param baseName base directory name
+ * @param options reporter options passed through
  */
-function addMetaData(test, baseName, options){
-    var json,
-        basePath = path.dirname(baseName),
-        jsonsDirectory = path.join(basePath,'jsons'),
-        file = path.join(basePath,'combined.json'),
-        lock = path.join(basePath,'.lock'),
-        data = [];
-
+function addMetaData(test, baseName, options) {
+    const basePath = path.dirname(baseName);
+    const file = path.join(basePath, 'combined.json');
+    const lock = path.join(basePath, '.lock');
+    let data = [];
     try {
         // delay if one write operation is pending
         if (fse.pathExistsSync(lock)) {
@@ -122,15 +135,15 @@ function addMetaData(test, baseName, options){
         data.push(test);
 
         fse.outputJsonSync(file, CircularJSON.stringify(data));
-        
+
         addHTMLReport(data, baseName, options);
 
         fs.rmdirSync(lock);
 
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         console.error('Could not save JSON for data: ' + test);
-    }    
+    }
 }
 
 /** Function: storeMetaData
@@ -145,21 +158,12 @@ function storeMetaData(metaData, file, descriptions) {
     try {
         metaData.description = cleanArray(descriptions).join('|');
         fse.outputJsonSync(file, metaData);
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         console.error('Could not save meta data for ' + file);
     }
 }
 
-function cleanArray(actual) {
-    var newArray = new Array();
-    for (var i = 0; i < actual.length; i++) {
-        if (actual[i]) {
-            newArray.push(actual[i]);
-        }
-    }
-    return newArray;
-}
 
 /** Function: gatherDescriptions
  * Traverses the parent suites of a test spec recursivly and gathers all
@@ -185,9 +189,12 @@ function cleanArray(actual) {
  *             itself.
  */
 function gatherDescriptions(suite, soFar) {
-    if (suite.description != null) { soFar.push(suite.description) };
+    if (suite.description != null) { // jshint ignore:line
+        //the != above is intentional: !== would distinguish between null and undefined (and we do not want this)
+        soFar.push(suite.description);
+    }
 
-    if(suite.parentSuite) {
+    if (suite.parentSuite) {
         return gatherDescriptions(suite.parentSuite, soFar);
     } else {
         return soFar;
@@ -201,33 +208,41 @@ function gatherDescriptions(suite, soFar) {
  *     (String) containing a guid
  */
 function generateGuid() {
-    var buf = new Uint16Array(8);
+    let buf = new Uint16Array(8);
     buf = crypto.randomBytes(8);
-    var S4 = function(num) {
-        var ret = num.toString(16);
-        while(ret.length < 4){
-            ret = "0"+ret;
+    const S4 = function (num) {
+        let ret = num.toString(16);
+        while (ret.length < 4) {
+            ret = "0" + ret;
         }
         return ret;
     };
 
     return (
-        S4(buf[0])+S4(buf[1])+"-"+S4(buf[2])+"-"+S4(buf[3])+"-"+
-        S4(buf[4])+"-"+S4(buf[5])+S4(buf[6])+S4(buf[7])
+        S4(buf[0]) + S4(buf[1]) + "-" + S4(buf[2]) + "-" + S4(buf[3]) + "-" +
+        S4(buf[4]) + "-" + S4(buf[5]) + S4(buf[6]) + S4(buf[7])
     );
 }
 
-function removeDirectory(dirPath){
-    try { var files = fs.readdirSync(dirPath); }
-    catch(e) { return; }
-    if (files.length > 0)
-        for (var i = 0; i < files.length; i++) {
-            var filePath = dirPath + '/' + files[i];
-            if (fs.statSync(filePath).isFile())
+function removeDirectory(dirPath) {
+    let files;
+    try {
+        files = fs.readdirSync(dirPath);
+    }
+    catch (e) {
+        return;
+    }
+    if (files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+            const filePath = dirPath + '/' + files[i];
+            if (fs.statSync(filePath).isFile()) {
                 fs.unlinkSync(filePath);
-            else
+            }
+            else {
                 removeDirectory(filePath);
+            }
         }
+    }
     fs.rmdirSync(dirPath);
 }
 

@@ -4,7 +4,7 @@
     const mkdirp = require('mkdirp');
 
 // for unit testing the app.js file has to patched (in runtime this is done while executing the e2e reporter)
-    const oldVersion = true; //fersing with other replacement strings
+    const oldVersion = false; //fersing with other replacement strings
 
 
 //this function is a copy of the sort funcgtion in /app/util.js
@@ -35,7 +35,7 @@
                 .replace('\'<Column Settings Replacement>\'', 'undefined');
 
         } else {
-            content = content.replace("var results = '<Results Replacement>';", testData)
+            content = content.replace("var results = [];//'<Results Replacement>'", testData)
                 .replace('defaultSortFunction/*<Sort Function Replacement>*/', sortFunction.toString())
                 .replace('{};//\'<Client Defaults Replacement>\'', "{}");
         }
