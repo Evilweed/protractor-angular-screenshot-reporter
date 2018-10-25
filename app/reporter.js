@@ -52,11 +52,11 @@ function defaultMetaDataBuilder(spec, descriptions, results, capabilities) {
         }
     };
 
-    if (results.items_.length > 0) {
+    if(results.items_.length > 0) {
         var result = results.items_[0];
-        if (!results.passed()) {
+        if(!results.passed()) {
             var failedItem = _.where(results.items_, {passed_: false})[0];
-            if (failedItem) {
+            if(failedItem) {
                 metaData.message = failedItem.message || 'Failed';
                 metaData.trace = failedItem.trace ? (failedItem.trace.stack || 'No Stack trace information') : 'No Stack trace information';
             }
@@ -85,20 +85,20 @@ function jasmine2MetaDataBuilder(spec, descriptions, results, capabilities) {
         }
     };
 
-    if (results.status === 'passed') {
+    if(results.status === 'passed') {
         metaData.message = (results.passedExpectations[0] || {}).message || 'Passed';
         metaData.trace = (results.passedExpectations[0] || {}).stack;
-    } else if (results.status === 'pending' || results.status === 'disabled') {
+    } else if(results.status === 'pending' || results.status === 'disabled') {
         metaData.message = results.pendingReason || 'Pending';
     } else {
 
-        if (results.failedExpectations[0].message) {
+        if(results.failedExpectations[0].message) {
             metaData.message = results.failedExpectations.map(result => result.message);
         } else {
             metaData.message = 'Failed';
         }
 
-        if (results.failedExpectations[0].stack) {
+        if(results.failedExpectations[0].stack) {
             metaData.trace = results.failedExpectations.map(result => result.stack);
         } else {
             metaData.trace = 'No Stack trace information';
@@ -110,11 +110,11 @@ function jasmine2MetaDataBuilder(spec, descriptions, results, capabilities) {
 
 
 function sortFunction(a, b) {
-    if (a.sessionId < b.sessionId) return -1;
-    else if (a.sessionId > b.sessionId) return 1;
+    if(a.sessionId < b.sessionId) return -1;
+    else if(a.sessionId > b.sessionId) return 1;
 
-    if (a.timestamp < b.timestamp) return -1;
-    else if (a.timestamp > b.timestamp) return 1;
+    if(a.timestamp < b.timestamp) return -1;
+    else if(a.timestamp > b.timestamp) return 1;
 
     return 0;
 }
@@ -143,26 +143,26 @@ function sortFunction(a, b) {
  */
 function ScreenshotReporter(options) {
     options = options || {};
-    if (!options.baseDirectory || options.baseDirectory.length === 0) {
+    if(!options.baseDirectory || options.baseDirectory.length === 0) {
         throw new Error('Please pass a valid base directory to store the ' +
             'screenshots into.');
     } else {
         this.baseDirectory = options.baseDirectory;
     }
 
-    if (typeof (options.cssOverrideFile) !== 'undefined' && _.isString(options.cssOverrideFile)) {
+    if(typeof (options.cssOverrideFile) !== 'undefined' && _.isString(options.cssOverrideFile)) {
         this.cssOverrideFile = options.cssOverrideFile;
     } else {
         this.cssOverrideFile = null;
     }
 
-    if (typeof (options.screenshotsSubfolder) !== 'undefined' && _.isString(options.screenshotsSubfolder)) {
+    if(typeof (options.screenshotsSubfolder) !== 'undefined' && _.isString(options.screenshotsSubfolder)) {
         this.screenshotsSubfolder = options.screenshotsSubfolder;
     } else {
         this.screenshotsSubfolder = '';
     }
 
-    if (typeof (options.jsonsSubfolder) !== 'undefined' && _.isString(options.jsonsSubfolder)) {
+    if(typeof (options.jsonsSubfolder) !== 'undefined' && _.isString(options.jsonsSubfolder)) {
         this.jsonsSubfolder = options.jsonsSubfolder;
     } else {
         this.jsonsSubfolder = '';
@@ -183,10 +183,10 @@ function ScreenshotReporter(options) {
     this.takeScreenShotsOnlyForFailedSpecs =
         options.takeScreenShotsOnlyForFailedSpecs || false;
     this.clientDefaults = options.clientDefaults;
-    if (options.searchSettings) { //settings in earlier "format" there?
+    if(options.searchSettings) { //settings in earlier "format" there?
         options.clientDefaults.searchSettings = options.searchSettings;
     }
-    if (options.columnSettings) {
+    if(options.columnSettings) {
         options.clientDefaults.columnSettings = options.columnSettings;
     }
 
@@ -205,7 +205,7 @@ function ScreenshotReporter(options) {
         prepareAssets: true,
         clientDefaults: this.clientDefaults
     };
-    if (!this.preserveDirectory) {
+    if(!this.preserveDirectory) {
         util.removeDirectory(this.finalOptions.baseDirectory);
     }
 }
@@ -252,7 +252,7 @@ class Jasmine2Reporter {
     _addTaskToFlow(callback) {
 
         /* Create. */
-        if (this._asyncFlow == null) {
+        if(this._asyncFlow == null) {
             this._asyncFlow = callback();
         }
         /* Chain. */
@@ -270,7 +270,7 @@ class Jasmine2Reporter {
 
     async _asyncSpecDone(result) {
         // Don't report if it's skipped and we don't need it
-        if ((result.status === 'pending' || result.status === 'disabled') && this._screenshotReporter.excludeSkippedSpecs) {
+        if((result.status === 'pending' || result.status === 'disabled') && this._screenshotReporter.excludeSkippedSpecs) {
             return;
         }
 
@@ -283,7 +283,7 @@ class Jasmine2Reporter {
 
     async _gatherBrowserLogs(result) {
 
-        if (!this._screenshotReporter.gatherBrowserLogs) {
+        if(!this._screenshotReporter.gatherBrowserLogs) {
             return;
         }
 
@@ -291,7 +291,7 @@ class Jasmine2Reporter {
         const browserName = capabilities.get('browserName');
 
         /* Skip incompatible browsers. */
-        if (browserName == null || !browserName.toLowerCase().match(/chrome/)) {
+        if(browserName == null || !browserName.toLowerCase().match(/chrome/)) {
             return;
         }
 
@@ -333,18 +333,18 @@ class Jasmine2Reporter {
 
         metaData.browserLogs = [];
 
-        if (!(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')) {
+        if(!(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')) {
             metaData.screenShotFile = path.join(this._screenshotReporter.screenshotsSubfolder, screenShotFileName);
         }
 
-        if (result.browserLogs) {
+        if(result.browserLogs) {
             metaData.browserLogs = result.browserLogs
         }
 
         metaData.timestamp = new Date(result.started).getTime();
         metaData.duration = new Date(result.stopped) - new Date(result.started);
 
-        if ((result.status !== 'pending' && result.status !== 'disabled') && !(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')) {
+        if((result.status !== 'pending' && result.status !== 'disabled') && !(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')) {
             const png = await browser.takeScreenshot();
             util.storeScreenShot(png, screenShotPath);
         }
@@ -359,7 +359,7 @@ class Jasmine2Reporter {
     _buildSuite() {
 
         const buildSuite = (suiteNames, i) => {
-            if (i < 0) {
+            if(i < 0) {
                 return null;
             }
             return {
