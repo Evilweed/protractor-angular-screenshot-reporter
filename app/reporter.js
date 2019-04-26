@@ -345,8 +345,17 @@ class Jasmine2Reporter {
         metaData.duration = new Date(result.stopped) - new Date(result.started);
 
         if ((result.status !== 'pending' && result.status !== 'disabled') && !(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')) {
-            const png = await browser.takeScreenshot();
-            util.storeScreenShot(png, screenShotPath);
+            try {
+                const png = await browser.takeScreenshot();
+                util.storeScreenShot(png, screenShotPath);
+            } catch(e) {
+                if (e['name'] === 'NoSuchWindowError') {
+                    console.info('Protractor-beautiful-reporter could not take the screenshot because target window already closed');
+                } else {
+                    console.error(e);
+                    console.error('Protractor-beautiful-reporter could not take the screenshot');
+                }
+            }
         }
 
         util.storeMetaData(metaData, jsonPartsPath, descriptions);
