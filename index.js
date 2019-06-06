@@ -5447,14 +5447,19 @@ function addMetaData(test, baseName, options) {
     const lock = path.join(basePath, '.lock');
     let data = [];
     try {
-        // delay if one write operation is pending
-        if (fse.pathExistsSync(lock)) {
-            setTimeout(function () {
-                addMetaData(test, baseName, options);
-            }, 200);
-            return;
+        try {
+            fs.mkdirSync(lock);
+        } catch(e) {
+            // delay if one write operation is pending
+            if(e.code === 'EEXIST')  {
+                setTimeout(function () {
+                    addMetaData(test, baseName, options);
+                }, 200);
+                return;
+            }
+            // something else happened (e.g. file access permissions)
+            throw e;
         }
-        fs.mkdirSync(lock);
         //concat all tests
         if (fse.pathExistsSync(file)) {
             data = JSON.parse(fse.readJsonSync(file), {encoding: 'utf8'});
@@ -5586,7 +5591,6 @@ module.exports = {
     , addMetaData: addMetaData
     , removeDirectory: removeDirectory
 };
-
 
 /***/ }),
 /* 146 */

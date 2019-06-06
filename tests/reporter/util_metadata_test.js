@@ -159,16 +159,17 @@ describe('unit tests', () => {
 
                 });
 
-                it('catches error and logs if param pathExists throws', () => {
+                it('catches error and logs if mkdirSync throws', () => {
                     const errorMsg = "fake error";
                     const fakePath = "./not/existing/path/" + util.generateGuid() + "/subdir";
-                    spyOn(fse, 'pathExistsSync').and.callFake(() => {
+                    spyOn(fs, 'mkdirSync').and.callFake(() => {
                         throw new Error(errorMsg);
                     });
                     spyOn(console, 'error').and.stub();
                     util.addMetaData({}, fakePath, {});
                     expect(console.error).toHaveBeenCalledWith(new Error(errorMsg));
                 });
+
 
             });
 
@@ -190,9 +191,6 @@ describe('unit tests', () => {
                     });
                     spyOn(fse, "outputJsonSync").and.stub();
                     spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                        if (fpath.endsWith(".lock")) {
-                            return false;
-                        }
                         if (fpath.endsWith("combined.json")) {
                             return false;
                         }
@@ -226,7 +224,6 @@ describe('unit tests', () => {
                     expect(console.error).not.toHaveBeenCalled();
                 });
 
-
                 it('writes contents to target file with preexisting file', () => {
                     const errorMsg = "mock case not expected: ";
                     const fakePath = "./not/existing/path/" + util.generateGuid() + "/subdir";
@@ -243,9 +240,69 @@ describe('unit tests', () => {
                     spyOn(fse, "outputJsonSync").and.stub();
 
                     spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                        if (fpath.endsWith(".lock")) {
-                            return false;
+                        if (fpath.endsWith("combined.json")) {
+                            return true;
                         }
+                        throw new Error(errorMsg + fpath);
+                    });
+
+                    // for addHTMLReport
+                    spyOn(fse, 'copySync').and.stub();
+                    spyOn(fs, 'readFileSync').and.returnValue(
+                        function () {
+                            this.toString = function () {
+                                return "";
+                            };
+                        }
+                    );
+                    spyOn(fs, 'createWriteStream').and.returnValue({
+                        write: jasmine.createSpy('write'),
+                        end: jasmine.createSpy('end')
+                    });
+
+                    // misc
+                    spyOn(console, 'error').and.stub();
+                    //end region mocks
+
+                    const metaData = {};
+                    const options = {
+                        docName: "report.html",
+                        sortFunction: defaultSortFunction
+                    };
+                    util.addMetaData(metaData, fakePath, options);
+
+                    expect(console.error).not.toHaveBeenCalled();
+                });
+
+                it('retries when locked and writes contents to target file with preexisting file ', () => {
+                    const errorMsg = "mock case not expected: ";
+                    const fakePath = "./not/existing/path/" + util.generateGuid() + "/subdir";
+
+                    function makeFEXISTErr() {
+                        const errorMsg = `EEXIST: file already exists, mkdir '${fakePath}'`;
+                        let err = new Error(errorMsg);
+                        err.code = "EEXIST";
+                        return err;
+                    }
+
+                    //region mocks
+
+                    // for addMetaData
+                    spyOn(fse, "ensureFileSync").and.stub();
+                    spyOn(fs, "rmdirSync").and.stub();
+                    let times = 0;
+                    spyOn(fs, "mkdirSync").and.callFake(() => {
+                        times++;
+                        if (times === 1) {
+                            throw makeFEXISTErr();
+                        }
+                    });
+                    spyOn(fse, "readJsonSync").and.callFake(() => {
+                        return "[]";
+                    });
+                    spyOn(fse, "outputJsonSync").and.stub();
+
+                    spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
                         if (fpath.endsWith("combined.json")) {
                             return true;
                         }
@@ -305,9 +362,6 @@ describe('unit tests', () => {
                     spyOn(fse, "outputJsonSync").and.stub();
 
                     spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                        if (fpath.endsWith(".lock")) {
-                            return false;
-                        }
                         if (fpath.endsWith("combined.json")) {
                             return true;
                         }
@@ -321,7 +375,7 @@ describe('unit tests', () => {
                     });
 
 
-                    spyOn(fs, 'createWriteStream').and.callFake((wfile) => {
+                    spyOn(fs, 'createWriteStream').and.callFake(() => {
                         throw new Error("Weird Error writing file");
                     });
 
@@ -360,9 +414,6 @@ describe('unit tests', () => {
                     spyOn(fse, "outputJsonSync").and.stub();
 
                     spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                        if (fpath.endsWith(".lock")) {
-                            return false;
-                        }
                         if (fpath.endsWith("combined.json")) {
                             return true;
                         }
@@ -425,9 +476,6 @@ describe('unit tests', () => {
                     spyOn(fse, "outputJsonSync").and.stub();
 
                     spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                        if (fpath.endsWith(".lock")) {
-                            return false;
-                        }
                         if (fpath.endsWith("combined.json")) {
                             return true;
                         }
@@ -491,9 +539,6 @@ describe('unit tests', () => {
                     spyOn(fse, "outputJsonSync").and.stub();
 
                     spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                        if (fpath.endsWith(".lock")) {
-                            return false;
-                        }
                         if (fpath.endsWith("combined.json")) {
                             return true;
                         }
@@ -562,9 +607,6 @@ describe('unit tests', () => {
                     spyOn(fse, "outputJsonSync").and.stub();
 
                     spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                        if (fpath.endsWith(".lock")) {
-                            return false;
-                        }
                         if (fpath.endsWith("combined.json")) {
                             return true;
                         }
@@ -635,9 +677,6 @@ describe('unit tests', () => {
                         spyOn(fse, "outputJsonSync").and.stub();
 
                         spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                            if (fpath.endsWith(".lock")) {
-                                return false;
-                            }
                             if (fpath.endsWith("combined.json")) {
                                 return true;
                             }
@@ -704,9 +743,6 @@ describe('unit tests', () => {
                     spyOn(fse, "outputJsonSync").and.stub();
 
                     spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                        if (fpath.endsWith(".lock")) {
-                            return false;
-                        }
                         if (fpath.endsWith("combined.json")) {
                             return true;
                         }
@@ -751,7 +787,7 @@ describe('unit tests', () => {
                     util.addMetaData(metaData, fakePath, options);
 
                     expect(console.error).not.toHaveBeenCalled();
-                    expect(jsContents).not.toContain('<Sort Function Replacement>')
+                    expect(jsContents).not.toContain('<Sort Function Replacement>');
                     expect(/results\.sort\(/.test(jsContents)).toBeTruthy();
                 });
                 //}
@@ -774,9 +810,6 @@ describe('unit tests', () => {
                         spyOn(fse, "outputJsonSync").and.stub();
 
                         spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                            if (fpath.endsWith(".lock")) {
-                                return false;
-                            }
                             if (fpath.endsWith("combined.json")) {
                                 return true;
                             }
@@ -846,9 +879,6 @@ describe('unit tests', () => {
                         spyOn(fse, "outputJsonSync").and.stub();
 
                         spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                            if (fpath.endsWith(".lock")) {
-                                return false;
-                            }
                             if (fpath.endsWith("combined.json")) {
                                 return true;
                             }
@@ -914,9 +944,6 @@ describe('unit tests', () => {
                         spyOn(fse, "outputJsonSync").and.stub();
 
                         spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                            if (fpath.endsWith(".lock")) {
-                                return false;
-                            }
                             if (fpath.endsWith("combined.json")) {
                                 return true;
                             }
@@ -994,9 +1021,6 @@ describe('unit tests', () => {
                         spyOn(fse, "outputJsonSync").and.stub();
 
                         spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                            if (fpath.endsWith(".lock")) {
-                                return false;
-                            }
                             if (fpath.endsWith("combined.json")) {
                                 return true;
                             }
@@ -1062,9 +1086,6 @@ describe('unit tests', () => {
                         spyOn(fse, "outputJsonSync").and.stub();
 
                         spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
-                            if (fpath.endsWith(".lock")) {
-                                return false;
-                            }
                             if (fpath.endsWith("combined.json")) {
                                 return true;
                             }
