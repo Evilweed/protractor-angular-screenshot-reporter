@@ -317,7 +317,7 @@ describe('unit tests', () => {
                     // for addHTMLReport
                     spyOn(fse, 'copySync').and.stub();
                     spyOn(fs, 'readFileSync').and.callFake(() => {
-                        return new Buffer(htmlTemplate);
+                        return Buffer.from(htmlTemplate);
                     });
 
 
@@ -372,7 +372,7 @@ describe('unit tests', () => {
                     // for addHTMLReport
                     spyOn(fse, 'copySync').and.stub();
                     spyOn(fs, 'readFileSync').and.callFake(() => {
-                        return new Buffer(htmlTemplate);
+                        return Buffer.from(htmlTemplate);
                     });
 
                     let htmlContents;
@@ -437,7 +437,7 @@ describe('unit tests', () => {
                     // for addHTMLReport
                     spyOn(fse, 'copySync').and.stub();
                     spyOn(fs, 'readFileSync').and.callFake(() => {
-                        return new Buffer(htmlTemplate);
+                        return Buffer.from(htmlTemplate);
                     });
 
                     let htmlContents;
@@ -503,7 +503,7 @@ describe('unit tests', () => {
                     // for addHTMLReport
                     spyOn(fse, 'copySync').and.stub();
                     spyOn(fs, 'readFileSync').and.callFake(() => {
-                        return new Buffer(htmlTemplate);
+                        return Buffer.from(htmlTemplate);
                     });
 
                     let htmlContents;
@@ -574,7 +574,7 @@ describe('unit tests', () => {
                     // for addHTMLReport
                     spyOn(fse, 'copySync').and.stub();
                     spyOn(fs, 'readFileSync').and.callFake(() => {
-                        return new Buffer(jsTemplate);
+                        return Buffer.from(jsTemplate);
                     });
 
                     let jsContents;
@@ -647,7 +647,7 @@ describe('unit tests', () => {
                         // for addHTMLReport
                         spyOn(fse, 'copySync').and.stub();
                         spyOn(fs, 'readFileSync').and.callFake(() => {
-                            return new Buffer(jsTemplate);
+                            return Buffer.from(jsTemplate);
                         });
 
                         let jsContents;
@@ -716,7 +716,7 @@ describe('unit tests', () => {
                     // for addHTMLReport
                     spyOn(fse, 'copySync').and.stub();
                     spyOn(fs, 'readFileSync').and.callFake(() => {
-                        return new Buffer(jsTemplate);
+                        return Buffer.from(jsTemplate);
                     });
 
                     let jsContents;
@@ -786,7 +786,7 @@ describe('unit tests', () => {
                         // for addHTMLReport
                         spyOn(fse, 'copySync').and.stub();
                         spyOn(fs, 'readFileSync').and.callFake(() => {
-                            return new Buffer(jsTemplate);
+                            return Buffer.from(jsTemplate);
                         });
 
                         let jsContents;
@@ -858,7 +858,7 @@ describe('unit tests', () => {
                         // for addHTMLReport
                         spyOn(fse, 'copySync').and.stub();
                         spyOn(fs, 'readFileSync').and.callFake(() => {
-                            return new Buffer(jsTemplate);
+                            return Buffer.from(jsTemplate);
                         });
 
                         let jsContents;
@@ -926,7 +926,7 @@ describe('unit tests', () => {
                         // for addHTMLReport
                         spyOn(fse, 'copySync').and.stub();
                         spyOn(fs, 'readFileSync').and.callFake(() => {
-                            return new Buffer(jsTemplate);
+                            return Buffer.from(jsTemplate);
                         });
 
                         let jsContents;
@@ -1006,7 +1006,7 @@ describe('unit tests', () => {
                         // for addHTMLReport
                         spyOn(fse, 'copySync').and.stub();
                         spyOn(fs, 'readFileSync').and.callFake(() => {
-                            return new Buffer(jsTemplate);
+                            return Buffer.from(jsTemplate);
                         });
 
                         let jsContents;
@@ -1074,7 +1074,7 @@ describe('unit tests', () => {
                         // for addHTMLReport
                         spyOn(fse, 'copySync').and.stub();
                         spyOn(fs, 'readFileSync').and.callFake(() => {
-                            return new Buffer(jsTemplate);
+                            return Buffer.from(jsTemplate);
                         });
 
                         let jsContents;
