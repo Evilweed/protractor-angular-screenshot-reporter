@@ -1101,12 +1101,13 @@ textarea {
     line-height: inherit;
 }
 a {
-    color: #2196f3;
+    color: #666666;
     text-decoration: none;
+    text-align: center;
 }
 a:hover,
 a:focus {
-    color: #0a6ebd;
+    color: #666666;
     text-decoration: underline;
 }
 a:focus {
@@ -2444,7 +2445,7 @@ table th[class*="col-"] {
     background-color: #f7a6a4;
 }
 .table-responsive {
-    overflow-x: auto;
+    
     min-height: 0.01%;
 }
 @media screen and (max-width: 767px) {

@@ -175,6 +175,7 @@ function ScreenshotReporter(options) {
     this.pathBuilder = options.pathBuilder || defaultPathBuilder;
     this.docTitle = options.docTitle || 'Test Results';
     this.docName = options.docName || 'report.html';
+    this.screenshotArray = options.screenshotArray || [];
     this.metaDataBuilder = options.metaDataBuilder || defaultMetaDataBuilder;
     this.jasmine2MetaDataBuilder = options.jasmine2MetaDataBuilder || jasmine2MetaDataBuilder;
     this.sortFunction = options.sortFunction || sortFunction;
@@ -342,7 +343,9 @@ class Jasmine2Reporter {
         let considerScreenshot = !(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')
 
         if (considerScreenshot) {
-            metaData.screenShotFile = path.join(this._screenshotReporter.screenshotsSubfolder, screenShotFileName);
+            this._screenshotReporter.screenshotArray.push(path.join(this._screenshotReporter.screenshotsSubfolder, screenShotFileName));
+            metaData.screenShotFile = [...this._screenshotReporter.screenshotArray];
+            this._screenshotReporter.screenshotArray.length = 0;
         }
 
         if (result.browserLogs) {

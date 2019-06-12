@@ -224,12 +224,6 @@ exports.f = __webpack_require__(7) ? Object.defineProperty : function defineProp
 
 /***/ }),
 /* 9 */
-/***/ (function(module, exports) {
-
-module.exports = require("path");
-
-/***/ }),
-/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.13 ToObject(argument)
@@ -238,6 +232,12 @@ module.exports = function (it) {
   return Object(defined(it));
 };
 
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
 
 /***/ }),
 /* 11 */
@@ -680,7 +680,7 @@ exports.f = __webpack_require__(7) ? gOPD : function getOwnPropertyDescriptor(O,
 
 // 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
 var has = __webpack_require__(17);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var IE_PROTO = __webpack_require__(91)('IE_PROTO');
 var ObjectProto = Object.prototype;
 
@@ -741,7 +741,7 @@ module.exports = function (it) {
 /* 23 */
 /***/ (function(module, exports) {
 
-var core = module.exports = { version: '2.6.5' };
+var core = module.exports = { version: '2.6.9' };
 if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
 
 
@@ -812,7 +812,7 @@ module.exports = function (it) {
 // 6 -> Array#findIndex
 var ctx = __webpack_require__(24);
 var IObject = __webpack_require__(53);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var toLength = __webpack_require__(6);
 var asc = __webpack_require__(75);
 module.exports = function (TYPE, $create) {
@@ -977,7 +977,7 @@ if (__webpack_require__(7)) {
   var has = __webpack_require__(17);
   var classof = __webpack_require__(48);
   var isObject = __webpack_require__(4);
-  var toObject = __webpack_require__(10);
+  var toObject = __webpack_require__(9);
   var isArrayIter = __webpack_require__(82);
   var create = __webpack_require__(39);
   var getPrototypeOf = __webpack_require__(19);
@@ -2381,7 +2381,7 @@ module.exports = function (S, index, unicode) {
 "use strict";
 // 22.1.3.6 Array.prototype.fill(value, start = 0, end = this.length)
 
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var toAbsoluteIndex = __webpack_require__(45);
 var toLength = __webpack_require__(6);
 module.exports = function fill(value /* , start = 0, end = @length */) {
@@ -3352,7 +3352,7 @@ module.exports = function (it, msg) {
 "use strict";
 // 22.1.3.3 Array.prototype.copyWithin(target, start, end = this.length)
 
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var toAbsoluteIndex = __webpack_require__(45);
 var toLength = __webpack_require__(6);
 
@@ -3396,7 +3396,7 @@ module.exports = function (iter, ITERATOR) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var aFunction = __webpack_require__(12);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var IObject = __webpack_require__(53);
 var toLength = __webpack_require__(6);
 
@@ -3901,10 +3901,11 @@ module.exports = Math.scale || function scale(x, inLow, inHigh, outLow, outHigh)
 "use strict";
 
 // 19.1.2.1 Object.assign(target, source, ...)
+var DESCRIPTORS = __webpack_require__(7);
 var getKeys = __webpack_require__(41);
 var gOPS = __webpack_require__(64);
 var pIE = __webpack_require__(54);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var IObject = __webpack_require__(53);
 var $assign = Object.assign;
 
@@ -3930,7 +3931,10 @@ module.exports = !$assign || __webpack_require__(3)(function () {
     var length = keys.length;
     var j = 0;
     var key;
-    while (length > j) if (isEnum.call(S, key = keys[j++])) T[key] = S[key];
+    while (length > j) {
+      key = keys[j++];
+      if (!DESCRIPTORS || isEnum.call(S, key)) T[key] = S[key];
+    }
   } return T;
 } : $assign;
 
@@ -4006,6 +4010,7 @@ module.exports = function (object, names) {
 /* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
+var DESCRIPTORS = __webpack_require__(7);
 var getKeys = __webpack_require__(41);
 var toIObject = __webpack_require__(20);
 var isEnum = __webpack_require__(54).f;
@@ -4017,9 +4022,13 @@ module.exports = function (isEntries) {
     var i = 0;
     var result = [];
     var key;
-    while (length > i) if (isEnum.call(O, key = keys[i++])) {
-      result.push(isEntries ? [key, O[key]] : O[key]);
-    } return result;
+    while (length > i) {
+      key = keys[i++];
+      if (!DESCRIPTORS || isEnum.call(O, key)) {
+        result.push(isEntries ? [key, O[key]] : O[key]);
+      }
+    }
+    return result;
   };
 };
 
@@ -4313,7 +4322,7 @@ module.exports = {
 // imported from ncp (this is temporary, will rewrite)
 
 var fs = __webpack_require__(11)
-var path = __webpack_require__(9)
+var path = __webpack_require__(10)
 var utimes = __webpack_require__(370)
 
 function ncp (source, dest, options, callback) {
@@ -4620,7 +4629,7 @@ exports.exists = function (filename, callback) {
 "use strict";
 
 
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 
 // get drive on windows
 function getRootPath (p) {
@@ -4677,13 +4686,15 @@ module.exports = require("assert");
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var util = __webpack_require__(145),
     _ = __webpack_require__(375),
-    path = __webpack_require__(9);
+    path = __webpack_require__(10);
 
 /** Function: defaultPathBuilder
  * This function builds paths for a screenshot file. It is appended to the
@@ -4855,6 +4866,7 @@ function ScreenshotReporter(options) {
     this.pathBuilder = options.pathBuilder || defaultPathBuilder;
     this.docTitle = options.docTitle || 'Test Results';
     this.docName = options.docName || 'report.html';
+    this.screenshotArray = options.screenshotArray || [];
     this.metaDataBuilder = options.metaDataBuilder || defaultMetaDataBuilder;
     this.jasmine2MetaDataBuilder = options.jasmine2MetaDataBuilder || jasmine2MetaDataBuilder;
     this.sortFunction = options.sortFunction || sortFunction;
@@ -5173,7 +5185,9 @@ var Jasmine2Reporter = function () {
 
 
                                 if (considerScreenshot) {
-                                    metaData.screenShotFile = path.join(this._screenshotReporter.screenshotsSubfolder, screenShotFileName);
+                                    this._screenshotReporter.screenshotArray.push(path.join(this._screenshotReporter.screenshotsSubfolder, screenShotFileName));
+                                    metaData.screenShotFile = [].concat(_toConsumableArray(this._screenshotReporter.screenshotArray));
+                                    this._screenshotReporter.screenshotArray.length = 0;
                                 }
 
                                 if (result.browserLogs) {
@@ -5325,7 +5339,7 @@ define(String.prototype, "padRight", "".padEnd);
 /***/ (function(module, exports, __webpack_require__) {
 
 const fs = __webpack_require__(72);
-const path = __webpack_require__(9);
+const path = __webpack_require__(10);
 const crypto = __webpack_require__(377);
 const CircularJSON = __webpack_require__(147);
 const fse = __webpack_require__(359);
@@ -6717,7 +6731,7 @@ $export($export.P + $export.F * !STRICT, 'Array', {
 
 var ctx = __webpack_require__(24);
 var $export = __webpack_require__(0);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var call = __webpack_require__(113);
 var isArrayIter = __webpack_require__(82);
 var toLength = __webpack_require__(6);
@@ -6970,7 +6984,7 @@ $export($export.P + $export.F * !__webpack_require__(25)([].some, true), 'Array'
 
 var $export = __webpack_require__(0);
 var aFunction = __webpack_require__(12);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var fails = __webpack_require__(3);
 var $sort = [].sort;
 var test = [1, 2, 3];
@@ -7030,7 +7044,7 @@ $export($export.P + $export.F * (Date.prototype.toISOString !== toISOString), 'D
 "use strict";
 
 var $export = __webpack_require__(0);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var toPrimitive = __webpack_require__(30);
 
 $export($export.P + $export.F * __webpack_require__(3)(function () {
@@ -7812,7 +7826,7 @@ __webpack_require__(29)('getOwnPropertyNames', function () {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.9 Object.getPrototypeOf(O)
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var $getPrototypeOf = __webpack_require__(19);
 
 __webpack_require__(29)('getPrototypeOf', function () {
@@ -7878,7 +7892,7 @@ $export($export.S, 'Object', { is: __webpack_require__(128) });
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.14 Object.keys(O)
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var $keys = __webpack_require__(41);
 
 __webpack_require__(29)('keys', function () {
@@ -8697,7 +8711,7 @@ __webpack_require__(59)('match', 1, function (defined, MATCH, $match, maybeCallN
 
 
 var anObject = __webpack_require__(1);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var toLength = __webpack_require__(6);
 var toInteger = __webpack_require__(26);
 var advanceStringIndex = __webpack_require__(73);
@@ -9421,12 +9435,14 @@ var enumKeys = __webpack_require__(152);
 var isArray = __webpack_require__(60);
 var anObject = __webpack_require__(1);
 var isObject = __webpack_require__(4);
+var toObject = __webpack_require__(9);
 var toIObject = __webpack_require__(20);
 var toPrimitive = __webpack_require__(30);
 var createDesc = __webpack_require__(42);
 var _create = __webpack_require__(39);
 var gOPNExt = __webpack_require__(120);
 var $GOPD = __webpack_require__(18);
+var $GOPS = __webpack_require__(64);
 var $DP = __webpack_require__(8);
 var $keys = __webpack_require__(41);
 var gOPD = $GOPD.f;
@@ -9443,7 +9459,7 @@ var SymbolRegistry = shared('symbol-registry');
 var AllSymbols = shared('symbols');
 var OPSymbols = shared('op-symbols');
 var ObjectProto = Object[PROTOTYPE];
-var USE_NATIVE = typeof $Symbol == 'function';
+var USE_NATIVE = typeof $Symbol == 'function' && !!$GOPS.f;
 var QObject = global.QObject;
 // Don't use setters in Qt Script, https://github.com/zloirock/core-js/issues/173
 var setter = !QObject || !QObject[PROTOTYPE] || !QObject[PROTOTYPE].findChild;
@@ -9553,7 +9569,7 @@ if (!USE_NATIVE) {
   $DP.f = $defineProperty;
   __webpack_require__(40).f = gOPNExt.f = $getOwnPropertyNames;
   __webpack_require__(54).f = $propertyIsEnumerable;
-  __webpack_require__(64).f = $getOwnPropertySymbols;
+  $GOPS.f = $getOwnPropertySymbols;
 
   if (DESCRIPTORS && !__webpack_require__(34)) {
     redefine(ObjectProto, 'propertyIsEnumerable', $propertyIsEnumerable, true);
@@ -9602,6 +9618,16 @@ $export($export.S + $export.F * !USE_NATIVE, 'Object', {
   getOwnPropertyNames: $getOwnPropertyNames,
   // 19.1.2.8 Object.getOwnPropertySymbols(O)
   getOwnPropertySymbols: $getOwnPropertySymbols
+});
+
+// Chrome 38 and 39 `Object.getOwnPropertySymbols` fails on primitives
+// https://bugs.chromium.org/p/v8/issues/detail?id=3443
+var FAILS_ON_PRIMITIVES = $fails(function () { $GOPS.f(1); });
+
+$export($export.S + $export.F * FAILS_ON_PRIMITIVES, 'Object', {
+  getOwnPropertySymbols: function getOwnPropertySymbols(it) {
+    return $GOPS.f(toObject(it));
+  }
 });
 
 // 24.3.2 JSON.stringify(value [, replacer [, space]])
@@ -9830,7 +9856,7 @@ __webpack_require__(58)(WEAK_SET, function (get) {
 // https://tc39.github.io/proposal-flatMap/#sec-Array.prototype.flatMap
 var $export = __webpack_require__(0);
 var flattenIntoArray = __webpack_require__(109);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var toLength = __webpack_require__(6);
 var aFunction = __webpack_require__(12);
 var arraySpeciesCreate = __webpack_require__(75);
@@ -9859,7 +9885,7 @@ __webpack_require__(33)('flatMap');
 // https://tc39.github.io/proposal-flatMap/#sec-Array.prototype.flatten
 var $export = __webpack_require__(0);
 var flattenIntoArray = __webpack_require__(109);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var toLength = __webpack_require__(6);
 var toInteger = __webpack_require__(26);
 var arraySpeciesCreate = __webpack_require__(75);
@@ -10154,7 +10180,7 @@ $export($export.S, 'Math', {
 "use strict";
 
 var $export = __webpack_require__(0);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var aFunction = __webpack_require__(12);
 var $defineProperty = __webpack_require__(8);
 
@@ -10173,7 +10199,7 @@ __webpack_require__(7) && $export($export.P + __webpack_require__(63), 'Object',
 "use strict";
 
 var $export = __webpack_require__(0);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var aFunction = __webpack_require__(12);
 var $defineProperty = __webpack_require__(8);
 
@@ -10235,7 +10261,7 @@ $export($export.S, 'Object', {
 "use strict";
 
 var $export = __webpack_require__(0);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var toPrimitive = __webpack_require__(30);
 var getPrototypeOf = __webpack_require__(19);
 var getOwnPropertyDescriptor = __webpack_require__(18).f;
@@ -10260,7 +10286,7 @@ __webpack_require__(7) && $export($export.P + __webpack_require__(63), 'Object',
 "use strict";
 
 var $export = __webpack_require__(0);
-var toObject = __webpack_require__(10);
+var toObject = __webpack_require__(9);
 var toPrimitive = __webpack_require__(30);
 var getPrototypeOf = __webpack_require__(19);
 var getOwnPropertyDescriptor = __webpack_require__(18).f;
@@ -11283,7 +11309,7 @@ module.exports = copyFileSync
 
 
 const fs = __webpack_require__(11)
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const copyFileSync = __webpack_require__(348)
 const mkdir = __webpack_require__(21)
 
@@ -11352,7 +11378,7 @@ module.exports = copySync
 
 
 const fs = __webpack_require__(11)
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const ncp = __webpack_require__(138)
 const mkdir = __webpack_require__(21)
 const pathExists = __webpack_require__(36).pathExists
@@ -11424,7 +11450,7 @@ module.exports = {
 
 const u = __webpack_require__(16).fromCallback
 const fs = __webpack_require__(72)
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const mkdir = __webpack_require__(21)
 const remove = __webpack_require__(71)
 
@@ -11478,7 +11504,7 @@ module.exports = {
 
 
 const u = __webpack_require__(16).fromCallback
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const fs = __webpack_require__(11)
 const mkdir = __webpack_require__(21)
 const pathExists = __webpack_require__(36).pathExists
@@ -11561,7 +11587,7 @@ module.exports = {
 
 
 const u = __webpack_require__(16).fromCallback
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const fs = __webpack_require__(11)
 const mkdir = __webpack_require__(21)
 const pathExists = __webpack_require__(36).pathExists
@@ -11628,7 +11654,7 @@ module.exports = {
 "use strict";
 
 
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const fs = __webpack_require__(11)
 const pathExists = __webpack_require__(36).pathExists
 
@@ -11773,7 +11799,7 @@ module.exports = {
 
 
 const u = __webpack_require__(16).fromCallback
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const fs = __webpack_require__(11)
 const _mkdirs = __webpack_require__(21)
 const mkdirs = _mkdirs.mkdirs
@@ -11898,7 +11924,7 @@ module.exports = jsonFile
 
 
 const fs = __webpack_require__(11)
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const mkdir = __webpack_require__(21)
 const jsonFile = __webpack_require__(100)
 
@@ -11922,7 +11948,7 @@ module.exports = outputJsonSync
 "use strict";
 
 
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const mkdir = __webpack_require__(21)
 const pathExists = __webpack_require__(36).pathExists
 const jsonFile = __webpack_require__(100)
@@ -11957,7 +11983,7 @@ module.exports = outputJson
 
 
 const fs = __webpack_require__(11)
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const invalidWin32Path = __webpack_require__(140).invalidWin32Path
 
 const o777 = parseInt('0777', 8)
@@ -12023,7 +12049,7 @@ module.exports = mkdirsSync
 
 
 const fs = __webpack_require__(11)
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const invalidWin32Path = __webpack_require__(140).invalidWin32Path
 
 const o777 = parseInt('0777', 8)
@@ -12093,7 +12119,7 @@ module.exports = mkdirs
 
 
 const fs = __webpack_require__(11)
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const copySync = __webpack_require__(137).copySync
 const removeSync = __webpack_require__(71).removeSync
 const mkdirpSync = __webpack_require__(21).mkdirsSync
@@ -12226,7 +12252,7 @@ module.exports = {
 const u = __webpack_require__(16).fromCallback
 const fs = __webpack_require__(11)
 const ncp = __webpack_require__(138)
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const remove = __webpack_require__(71).remove
 const mkdirp = __webpack_require__(21).mkdirs
 
@@ -12388,7 +12414,7 @@ module.exports = {
 
 const u = __webpack_require__(16).fromCallback
 const fs = __webpack_require__(11)
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const mkdir = __webpack_require__(21)
 const pathExists = __webpack_require__(36).pathExists
 
@@ -12434,7 +12460,7 @@ module.exports = {
 
 
 const fs = __webpack_require__(11)
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 const assert = __webpack_require__(142)
 
 const isWindows = (process.platform === 'win32')
@@ -12761,7 +12787,7 @@ module.exports = assign
 
 const fs = __webpack_require__(11)
 const os = __webpack_require__(378)
-const path = __webpack_require__(9)
+const path = __webpack_require__(10)
 
 // HFS, ext{2,3}, FAT do not, Node.js v0.10 does not
 function hasMillisResSync () {

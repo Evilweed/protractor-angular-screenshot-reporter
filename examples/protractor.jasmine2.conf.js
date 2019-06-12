@@ -1,5 +1,8 @@
 var HtmlReporter = require('protractor-beautiful-reporter');
-var path = require('path');
+var util = require('../app/util'),
+  _ = require('underscore'),
+ path = require('path');
+
 
 // ----- Config example for Jasmine 2 -----
 
@@ -84,7 +87,7 @@ exports.config = {
 
     onPrepare: function () {
         // Add a screenshot reporter:
-        jasmine.getEnv().addReporter(new HtmlReporter({
+        var reporter = new HtmlReporter({
             preserveDirectory: false,
             takeScreenShotsOnlyForFailedSpecs: true,
             screenshotsSubfolder: 'images',
@@ -108,7 +111,45 @@ exports.config = {
                     // capabilities.get('browserName'),
                     validDescriptions.join('-'));
             }
-        }).getJasmine2Reporter());
+        })
+        jasmine.getEnv().addReporter(
+            reporter.getJasmine2Reporter()
+        );
+        ExpectFailed(reporter);
+        function ExpectFailed(rep) {
+            var originalAddExpectationResult = jasmine.Spec.prototype.addExpectationResult;
+            jasmine.Spec.prototype.addExpectationResult = function (passed, expectation) {
+              var self = rep;
+      
+              var makeScreenshotsFromEachBrowsers = false;
+      
+              if (!passed) {
+                makeScreenshotsFromEachBrowsers = true;
+              }
+              if (makeScreenshotsFromEachBrowsers) {
+                let tst = util.generateGuid();
+                let screenShotFileName = path.basename(tst + '.png');
+                let screenShotFilePath = path.join(path.dirname(self.baseName + '.png'), self.screenshotsSubfolder);
+                let screenShotPath = path.join(self.baseDirectory, screenShotFilePath, screenShotFileName);
+                self.screenshotArray.push(path.join(self.screenshotsSubfolder, screenShotFileName));                
+                try {
+                  browser.takeScreenshot().then(png => {
+                    util.storeScreenShot(png, screenShotPath);
+                  });
+                }
+                catch (ex) {
+                  if (ex['name'] === 'NoSuchWindowError') {
+                    console.warn('Protractor-beautiful-reporter could not take the screenshot because target window is already closed');
+                  } else {
+                    console.error(ex);
+                    console.error('Protractor-beautiful-reporter could not take the screenshot');
+                  }
+                  metaData.screenShotFile = void 0;
+                }
+              }
+              return originalAddExpectationResult.apply(this, arguments);
+            }
+          }
     },
 
     jasmineNodeOpts: {
