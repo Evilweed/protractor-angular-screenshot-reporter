@@ -4906,6 +4906,36 @@ function ScreenshotReporter(options) {
     }
 }
 
+function expectFailed(rep) {
+    var originalAddExpectationResult = jasmine.Spec.prototype.addExpectationResult;
+    jasmine.Spec.prototype.addExpectationResult = function (passed, expectation) {
+        var self = rep;
+
+        if (!passed) {
+            var baseName = self._screenshotReporter.pathBuilder(null, [expectation.message], null, null);
+            var tst = util.generateGuid();
+            var screenShotFileName = path.basename(tst + '.png');
+            var screenShotFilePath = path.join(path.dirname(baseName + '.png'), self._screenshotReporter.screenshotsSubfolder);
+            var screenShotPath = path.join(self._screenshotReporter.baseDirectory, screenShotFilePath, screenShotFileName);
+            self._screenshotReporter.screenshotArray.push(path.join(self._screenshotReporter.screenshotsSubfolder, screenShotFileName));
+            try {
+                browser.takeScreenshot().then(function (png) {
+                    util.storeScreenShot(png, screenShotPath);
+                });
+            } catch (ex) {
+                if (ex['name'] === 'NoSuchWindowError') {
+                    console.warn('Protractor-beautiful-reporter could not take the screenshot because target window is already closed');
+                } else {
+                    console.error(ex);
+                    console.error('Protractor-beautiful-reporter could not take the screenshot');
+                }
+                metaData.screenShotFile = void 0;
+            }
+        }
+        return originalAddExpectationResult.apply(this, arguments);
+    };
+};
+
 var Jasmine2Reporter = function () {
     function Jasmine2Reporter(_ref) {
         var screenshotReporter = _ref.screenshotReporter;
@@ -4913,9 +4943,9 @@ var Jasmine2Reporter = function () {
         _classCallCheck(this, Jasmine2Reporter);
 
         /* `_asyncFlow` is a promise.
-         * It is a "flow" that we create in `specDone`.
-         * `suiteDone`, `suiteStarted` and `specStarted` will then add their steps to the flow and the `_awaitAsyncFlow`
-         * function will wait for the flow to finish before running the next spec. */
+        * It is a "flow" that we create in `specDone`.
+        * `suiteDone`, `suiteStarted` and `specStarted` will then add their steps to the flow and the `_awaitAsyncFlow`
+        * function will wait for the flow to finish before running the next spec. */
         this._asyncFlow = null;
 
         this._screenshotReporter = screenshotReporter;
@@ -5278,8 +5308,9 @@ var Jasmine2Reporter = function () {
 
 
 ScreenshotReporter.prototype.getJasmine2Reporter = function () {
-
-    return new Jasmine2Reporter({ screenshotReporter: this });
+    var reporter = new Jasmine2Reporter({ screenshotReporter: this });
+    expectFailed(reporter);
+    return reporter;
 };
 
 /** Function: reportSpecResults

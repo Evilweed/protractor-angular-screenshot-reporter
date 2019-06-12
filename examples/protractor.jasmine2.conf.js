@@ -1,162 +1,127 @@
 var HtmlReporter = require('protractor-beautiful-reporter');
 var util = require('../app/util'),
   _ = require('underscore'),
- path = require('path');
+  path = require('path');
 
 
 // ----- Config example for Jasmine 2 -----
 
 exports.config = {
-    // ----- How to setup Selenium -----
-    //
-    // There are three ways to specify how to use Selenium. Specify one of the
-    // following:
-    //
-    // 1. seleniumServerJar - to start Selenium Standalone locally.
-    // 2. seleniumAddress - to connect to a Selenium server which is already
-    //    running.
-    // 3. sauceUser/sauceKey - to use remote Selenium servers via SauceLabs.
+  // ----- How to setup Selenium -----
+  //
+  // There are three ways to specify how to use Selenium. Specify one of the
+  // following:
+  //
+  // 1. seleniumServerJar - to start Selenium Standalone locally.
+  // 2. seleniumAddress - to connect to a Selenium server which is already
+  //    running.
+  // 3. sauceUser/sauceKey - to use remote Selenium servers via SauceLabs.
 
-    // The location of the selenium standalone server .jar file.
-    //seleniumServerJar: 'node_modules/protractor/selenium/selenium-server-standalone-2.37.0.jar',
+  // The location of the selenium standalone server .jar file.
+  //seleniumServerJar: 'node_modules/protractor/selenium/selenium-server-standalone-2.37.0.jar',
 
-    // Address of selenium server (before running protractor, run "webdriver-manager start" to start the Selenium server)
-    seleniumAddress: process.env.SELENIUMSERVER ? process.env.SELENIUMSERVER : 'http://localhost:4444/wd/hub',
+  // Address of selenium server (before running protractor, run "webdriver-manager start" to start the Selenium server)
+  seleniumAddress: process.env.SELENIUMSERVER ? process.env.SELENIUMSERVER : 'http://localhost:4444/wd/hub',
 
-    // The port to start the selenium server on, or null if the server should
-    // find its own unused port.
-    seleniumPort: null,
+  // The port to start the selenium server on, or null if the server should
+  // find its own unused port.
+  seleniumPort: null,
 
-    // Chromedriver location is used to help the selenium standalone server
-    // find chromedriver. This will be passed to the selenium jar as
-    // the system property webdriver.chrome.driver. If null, selenium will
-    // attempt to find chromedriver using PATH.
-    //chromeDriver: 'node_modules/protractor/selenium/chromedriver',
+  // Chromedriver location is used to help the selenium standalone server
+  // find chromedriver. This will be passed to the selenium jar as
+  // the system property webdriver.chrome.driver. If null, selenium will
+  // attempt to find chromedriver using PATH.
+  //chromeDriver: 'node_modules/protractor/selenium/chromedriver',
 
-    // Additional command line options to pass to selenium. For example,
-    // if you need to change the browser timeout, use
-    // seleniumArgs: ['-browserTimeout=60'],
-    seleniumArgs: [],
+  // Additional command line options to pass to selenium. For example,
+  // if you need to change the browser timeout, use
+  // seleniumArgs: ['-browserTimeout=60'],
+  seleniumArgs: [],
 
-    // If sauceUser and sauceKey are specified, seleniumServerJar will be ignored.
-    // The tests will be run remotely using SauceLabs.
-    sauceUser: null,
-    sauceKey: null,
+  // If sauceUser and sauceKey are specified, seleniumServerJar will be ignored.
+  // The tests will be run remotely using SauceLabs.
+  sauceUser: null,
+  sauceKey: null,
 
-    // ----- What tests to run -----
-    //
-    // Spec patterns are relative to the location of this config.
-    specs: [
-        './specs/*.js'
-    ],
+  // ----- What tests to run -----
+  //
+  // Spec patterns are relative to the location of this config.
+  specs: [
+    './specs/*.js'
+  ],
 
-    // ----- Capabilities to be passed to the webdriver instance ----
-    //
-    // For a full list of available capabilities, see
-    // https://code.google.com/p/selenium/wiki/DesiredCapabilities
-    // and
-    // https://code.google.com/p/selenium/source/browse/javascript/webdriver/capabilities.js
-    capabilities: {
-        browserName: 'chrome',
-        logName: 'Chrome - English',
-        version: '',
-        platform: 'ANY',
-        shardTestFiles: false,
-        maxInstances: 2,
+  // ----- Capabilities to be passed to the webdriver instance ----
+  //
+  // For a full list of available capabilities, see
+  // https://code.google.com/p/selenium/wiki/DesiredCapabilities
+  // and
+  // https://code.google.com/p/selenium/source/browse/javascript/webdriver/capabilities.js
+  capabilities: {
+    browserName: 'chrome',
+    logName: 'Chrome - English',
+    version: '',
+    platform: 'ANY',
+    shardTestFiles: false,
+    maxInstances: 2,
 
-        chromeOptions: {
-            args: ["--window-size=1680,1000"]
-            // commented out but needed to keep it for local testing
-            //,  binary: process.env.CHROMIUM_BIN
-            //
-            //     args:["--headless","--disable-gpu","--window-size=1680,1680"]
-            //     args:["--headless","--disable-gpu","--force-device-scale-factor=1.75","--high-dpi-support=1.75","--window-size=1400,1680"]
-        }
-    },
-
-    // A base URL for your application under test. Calls to protractor.get()
-    // with relative paths will be prepended with this.
-    baseUrl: 'http://localhost:9999',
-
-    // Set the framework
-    framework: 'jasmine',
-
-    // Selector for the element housing the angular app - this defaults to
-    // body, but is necessary if ng-app is on a descendant of <body>
-    rootElement: 'body',
-
-    onPrepare: function () {
-        // Add a screenshot reporter:
-        var reporter = new HtmlReporter({
-            preserveDirectory: false,
-            takeScreenShotsOnlyForFailedSpecs: true,
-            screenshotsSubfolder: 'images',
-            jsonsSubfolder: 'jsons',
-            baseDirectory: 'reports-tmp',
-
-            pathBuilder: function pathBuilder(spec, descriptions, results, capabilities) {
-                // Return '<30-12-2016>/<browser>/<specname>' as path for screenshots:
-                // Example: '30-12-2016/firefox/list-should work'.
-                var currentDate = new Date(),
-                    day = currentDate.getDate(),
-                    month = currentDate.getMonth() + 1,
-                    year = currentDate.getFullYear();
-
-                var validDescriptions = descriptions.map(function (description) {
-                    return description.replace('/', '@');
-                });
-
-                return path.join(
-                    day + "-" + month + "-" + year,
-                    // capabilities.get('browserName'),
-                    validDescriptions.join('-'));
-            }
-        })
-        jasmine.getEnv().addReporter(
-            reporter.getJasmine2Reporter()
-        );
-        ExpectFailed(reporter);
-        function ExpectFailed(rep) {
-            var originalAddExpectationResult = jasmine.Spec.prototype.addExpectationResult;
-            jasmine.Spec.prototype.addExpectationResult = function (passed, expectation) {
-              var self = rep;
-      
-              var makeScreenshotsFromEachBrowsers = false;
-      
-              if (!passed) {
-                makeScreenshotsFromEachBrowsers = true;
-              }
-              if (makeScreenshotsFromEachBrowsers) {
-                let tst = util.generateGuid();
-                let screenShotFileName = path.basename(tst + '.png');
-                let screenShotFilePath = path.join(path.dirname(self.baseName + '.png'), self.screenshotsSubfolder);
-                let screenShotPath = path.join(self.baseDirectory, screenShotFilePath, screenShotFileName);
-                self.screenshotArray.push(path.join(self.screenshotsSubfolder, screenShotFileName));                
-                try {
-                  browser.takeScreenshot().then(png => {
-                    util.storeScreenShot(png, screenShotPath);
-                  });
-                }
-                catch (ex) {
-                  if (ex['name'] === 'NoSuchWindowError') {
-                    console.warn('Protractor-beautiful-reporter could not take the screenshot because target window is already closed');
-                  } else {
-                    console.error(ex);
-                    console.error('Protractor-beautiful-reporter could not take the screenshot');
-                  }
-                  metaData.screenShotFile = void 0;
-                }
-              }
-              return originalAddExpectationResult.apply(this, arguments);
-            }
-          }
-    },
-
-    jasmineNodeOpts: {
-        // If true, print colors to the terminal.
-        showColors: true,
-        // Default time to wait in ms before a test fails.
-        defaultTimeoutInterval: 30000,
+    chromeOptions: {
+      args: ["--window-size=1680,1000"]
+      // commented out but needed to keep it for local testing
+      //,  binary: process.env.CHROMIUM_BIN
+      //
+      //     args:["--headless","--disable-gpu","--window-size=1680,1680"]
+      //     args:["--headless","--disable-gpu","--force-device-scale-factor=1.75","--high-dpi-support=1.75","--window-size=1400,1680"]
     }
+  },
+
+  // A base URL for your application under test. Calls to protractor.get()
+  // with relative paths will be prepended with this.
+  baseUrl: 'http://localhost:9999',
+
+  // Set the framework
+  framework: 'jasmine',
+
+  // Selector for the element housing the angular app - this defaults to
+  // body, but is necessary if ng-app is on a descendant of <body>
+  rootElement: 'body',
+
+  onPrepare: function () {
+    // Add a screenshot reporter:
+
+    jasmine.getEnv().addReporter(
+      new HtmlReporter({
+        preserveDirectory: false,
+        takeScreenShotsOnlyForFailedSpecs: true,
+        screenshotsSubfolder: 'images',
+        jsonsSubfolder: 'jsons',
+        baseDirectory: 'reports-tmp',
+
+        pathBuilder: function pathBuilder(spec, descriptions, results, capabilities) {
+          // Return '<30-12-2016>/<browser>/<specname>' as path for screenshots:
+          // Example: '30-12-2016/firefox/list-should work'.
+          var currentDate = new Date(),
+            day = currentDate.getDate(),
+            month = currentDate.getMonth() + 1,
+            year = currentDate.getFullYear();
+
+          var validDescriptions = descriptions.map(function (description) {
+            return description.replace('/', '@');
+          });
+
+          return path.join(
+            day + "-" + month + "-" + year,
+            // capabilities.get('browserName'),
+            validDescriptions.join('-'));
+        }
+      }).getJasmine2Reporter()
+    );
+  },
+
+  jasmineNodeOpts: {
+    // If true, print colors to the terminal.
+    showColors: true,
+    // Default time to wait in ms before a test fails.
+    defaultTimeoutInterval: 30000,
+  }
 };
 
