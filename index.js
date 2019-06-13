@@ -4913,8 +4913,8 @@ function expectFailed(rep) {
 
         if (!passed) {
             var baseName = self._screenshotReporter.pathBuilder(null, [expectation.message], null, null);
-            var tst = util.generateGuid();
-            var screenShotFileName = path.basename(tst + '.png');
+            var gUid = util.generateGuid();
+            var screenShotFileName = path.basename(gUid + '.png');
             var screenShotFilePath = path.join(path.dirname(baseName + '.png'), self._screenshotReporter.screenshotsSubfolder);
             var screenShotPath = path.join(self._screenshotReporter.baseDirectory, screenShotFilePath, screenShotFileName);
             self._screenshotReporter.screenshotArray.push(path.join(self._screenshotReporter.screenshotsSubfolder, screenShotFileName));
