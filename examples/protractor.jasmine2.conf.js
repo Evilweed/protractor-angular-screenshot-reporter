@@ -1,7 +1,5 @@
 var HtmlReporter = require('protractor-beautiful-reporter');
-var util = require('../app/util'),
-  _ = require('underscore'),
-  path = require('path');
+var path = require('path');
 
 
 // ----- Config example for Jasmine 2 -----
@@ -88,8 +86,7 @@ exports.config = {
   onPrepare: function () {
     // Add a screenshot reporter:
 
-    jasmine.getEnv().addReporter(
-      new HtmlReporter({
+    jasmine.getEnv().addReporter(new HtmlReporter({
         preserveDirectory: false,
         takeScreenShotsOnlyForFailedSpecs: true,
         screenshotsSubfolder: 'images',
@@ -113,8 +110,7 @@ exports.config = {
             // capabilities.get('browserName'),
             validDescriptions.join('-'));
         }
-      }).getJasmine2Reporter()
-    );
+      }).getJasmine2Reporter());
   },
 
   jasmineNodeOpts: {

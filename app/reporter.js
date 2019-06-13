@@ -229,8 +229,8 @@ function expectFailed(rep) {
                 null,
                 null
             );
-            let tst = util.generateGuid();
-            let screenShotFileName = path.basename(tst + '.png');
+            let gUid = util.generateGuid();
+            let screenShotFileName = path.basename(gUid + '.png');
             let screenShotFilePath = path.join(path.dirname(baseName + '.png'), self._screenshotReporter.screenshotsSubfolder);
             let screenShotPath = path.join(self._screenshotReporter.baseDirectory, screenShotFilePath, screenShotFileName);
             self._screenshotReporter.screenshotArray.push(path.join(self._screenshotReporter.screenshotsSubfolder, screenShotFileName));
