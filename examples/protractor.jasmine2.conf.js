@@ -1,7 +1,6 @@
 var HtmlReporter = require('protractor-beautiful-reporter');
 var path = require('path');
 
-
 // ----- Config example for Jasmine 2 -----
 
 exports.config = {
@@ -85,7 +84,6 @@ exports.config = {
 
   onPrepare: function () {
     // Add a screenshot reporter:
-
     jasmine.getEnv().addReporter(new HtmlReporter({
         preserveDirectory: false,
         takeScreenShotsOnlyForFailedSpecs: true,

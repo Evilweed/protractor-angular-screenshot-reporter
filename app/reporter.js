@@ -55,7 +55,7 @@ function defaultMetaDataBuilder(spec, descriptions, results, capabilities) {
     if (results.items_.length > 0) {
         var result = results.items_[0];
         if (!results.passed()) {
-            var failedItem = _.where(results.items_, { passed_: false })[0];
+            var failedItem = _.where(results.items_, {passed_: false})[0];
             if (failedItem) {
                 metaData.message = failedItem.message || 'Failed';
                 metaData.trace = failedItem.trace ? (failedItem.trace.stack || 'No Stack trace information') : 'No Stack trace information';
@@ -254,7 +254,7 @@ function expectFailed(rep) {
 };
 class Jasmine2Reporter {
 
-    constructor({ screenshotReporter }) {
+    constructor({screenshotReporter}) {
 
         /* `_asyncFlow` is a promise.
         * It is a "flow" that we create in `specDone`.
@@ -390,16 +390,16 @@ class Jasmine2Reporter {
         metaData.timestamp = new Date(result.started).getTime();
         metaData.duration = new Date(result.stopped) - new Date(result.started);
 
-        let testWasExecuted = !(['pending', 'disabled', 'excluded'].includes(result.status));
+        let testWasExecuted = ! (['pending', 'disabled', 'excluded'].includes(result.status));
         if (testWasExecuted && considerScreenshot) {
             try {
                 const png = await browser.takeScreenshot();
                 util.storeScreenShot(png, screenShotPath);
             }
-            catch (ex) {
-                if (ex['name'] === 'NoSuchWindowError') {
+            catch(ex) {
+                if(ex['name'] === 'NoSuchWindowError') {
                     console.warn('Protractor-beautiful-reporter could not take the screenshot because target window is already closed');
-                } else {
+                }else {
                     console.error(ex);
                     console.error('Protractor-beautiful-reporter could not take the screenshot');
                 }
