@@ -175,7 +175,7 @@ function ScreenshotReporter(options) {
     this.pathBuilder = options.pathBuilder || defaultPathBuilder;
     this.docTitle = options.docTitle || 'Test Results';
     this.docName = options.docName || 'report.html';
-    this.screenshotArray = options.screenshotArray || [];
+    this.screenshotOnFailure = typeof options.screenshotOnFailure !== 'undefined' ? options.screenshotOnFailure : false;
     this.metaDataBuilder = options.metaDataBuilder || defaultMetaDataBuilder;
     this.jasmine2MetaDataBuilder = options.jasmine2MetaDataBuilder || jasmine2MetaDataBuilder;
     this.sortFunction = options.sortFunction || sortFunction;
@@ -215,6 +215,7 @@ function ScreenshotReporter(options) {
     if (!this.preserveDirectory) {
         util.removeDirectory(this.finalOptions.baseDirectory);
     }
+    this.screenshotArray = [];
 }
 
 function expectFailed(rep) {
@@ -222,7 +223,7 @@ function expectFailed(rep) {
     jasmine.Spec.prototype.addExpectationResult = function (passed, expectation) {
         var self = rep;
 
-        if (!passed) {
+        if (!passed && self._screenshotReporter.screenshotOnFailure) {
             let baseName = self._screenshotReporter.pathBuilder(
                 null,
                 [expectation.message],
