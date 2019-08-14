@@ -49,6 +49,14 @@ h2 {
     padding-top: 20px !important;
 }
 
+.col{
+    margin-right: 20%;
+}
+
+.table-responsive{
+    margin-top: 3%;
+}
+
 .spec {
     /*background-color: grey;*/
     /*color: white;*/
@@ -104,7 +112,7 @@ table {
 }
 
 .screenshotLink {
-    max-width: 100%;
+    max-width: 300%;
 }
 
 .screenshotImage {
@@ -121,7 +129,8 @@ table {
 
 .message {
     display: block;
-    white-space: pre-wrap;
+    /* white-space: pre-wrap; */
+    text-align: left;
 }
 
 .message:not(:first-child) {

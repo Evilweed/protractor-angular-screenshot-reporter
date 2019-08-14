@@ -279,6 +279,17 @@ Default is `report.html`.
     , cssOverrideFile: 'css/style.css'
  });
  ```
+ 
+ ### Option to add inline CSS in reporter (optional)
+ If you want to tweak some details you can add/overide css rules into the page.
+ 
+ This example will make the image/browserlogs modal window to occupy more screen real-estate
+ ```javascript
+ new HtmlReporter({
+    baseDirectory: 'tmp/screenshots'
+    , customCssInline: `.modal-lg { width: 88% }`,
+ });
+ ```
 
 ### Preserve base directory (optional)
  You can preserve (or clear) the base directory using `preserveDirectory:` option:
