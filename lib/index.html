@@ -21,6 +21,7 @@
 <h2><span class="report-title">
     <!-- Here goes title -->
     </span>
+    <span ng-if="ctrl.showTotalDurationIn==='header'" class="h-total-duration"> ( {{ ctrl.totalDuration() | timeFormat:ctrl.totalDurationFormat }} )</span>
     <div class="pull-right">
         <button class="btn btn-default" ng-class="{active: !ctrl.displayTime}"
                 ng-click="ctrl.displayTime = !ctrl.displayTime">TIME
@@ -144,7 +145,7 @@
                         <span class="glyphicon glyphicon-picture black"></span>
                 </span>
                 <a href="" ng-if="ctrl.inlineScreenshots && result.screenShotFile" data-toggle="modal" data-target="#imageModal{{$index}}">
-                    <img ng-src="{{result.screenShotFile}}" class="screenshotLink"/></a>
+                    <img ng-src="{{result.screenShotFile}}" class="screenshotLink" alt="inline screenshot"></a>
                 <!-- Screenshot Modal -->
                 <pbr-screenshot-modal index="$index" data="result" has-previous="ctrl.hasPreviousScreenshot($index)" previous="ctrl.getPreviousScreenshotIdx($index)" has-next="ctrl.hasNextScreenshot($index)" next="ctrl.getNextScreenshotIdx($index)" ></pbr-screenshot-modal>
             </div>
@@ -156,6 +157,7 @@
     <a class="github-button" href="https://github.com/Evilweed/protractor-beautiful-reporter" data-size="large" data-show-count="true" aria-label="Star Evilweed/protractor-beautiful-reporter on GitHub">Star</a>
 </div>
 {{ctrl.currentParent = "";""}}
+<div class="f-total-duration" ng-if="ctrl.showTotalDurationIn==='footer'" ><span>Duration {{ ctrl.totalDuration() | timeFormat:ctrl.totalDurationFormat }}</span></div>
 <script src="assets/main.js"></script>
 <script async defer src="assets/buttons.js"></script>
 </body>

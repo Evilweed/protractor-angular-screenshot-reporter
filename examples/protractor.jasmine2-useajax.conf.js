@@ -102,25 +102,9 @@ exports.config = {
             jsonsSubfolder: 'jsons',
             baseDirectory: 'reports-tmp',
             clientDefaults:{
-              useAjax:true
-            },
-
-            pathBuilder: function pathBuilder(spec, descriptions, results, capabilities) {
-                // Return '<30-12-2016>/<browser>/<specname>' as path for screenshots:
-                // Example: '30-12-2016/firefox/list-should work'.
-                var currentDate = new Date(),
-                    day = currentDate.getDate(),
-                    month = currentDate.getMonth() + 1,
-                    year = currentDate.getFullYear();
-
-                var validDescriptions = descriptions.map(function (description) {
-                    return description.replace('/', '@');
-                });
-
-                return path.join(
-                    day + "-" + month + "-" + year,
-                    // capabilities.get('browserName'),
-                    validDescriptions.join('-'));
+              useAjax:true,
+              totalDurationFormat:'hms',
+              showTotalDurationIn: 'header'
             }
         }).getJasmine2Reporter());
     },

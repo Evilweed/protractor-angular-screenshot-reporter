@@ -385,6 +385,18 @@ add the following to columnSettings (values are in milliseconds scale):
       }     
    });
 ```
+### Show total duration of test execution
+ If you want to show the total duration in the header or footer area...
+```javascript
+  new HtmlReporter({
+     baseDirectory: 'reports'
+     , clientDefaults:{
+         showTotalDurationIn: "header",                  
+         totalDurationFormat: "hms",            
+     }     
+  });
+```
+
 
 ### Load spec results via ajax
 By default the raw data of all tests results from the e2e session are embedded in the main javascript file (array results in app.js).

@@ -95,6 +95,10 @@ table {
     text-align: center;
 }
 
+.f-total-duration{
+    text-align: center;
+}
+
 .progress-striped {
     height: 30px !important;
 }

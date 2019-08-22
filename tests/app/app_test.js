@@ -241,6 +241,13 @@ describe('unit tests', function () {
                     controller.sortSpecs();
                 });
 
+                it('check total duration', function () {
+                    var $scope = $rootScope.$new();
+                    expect($scope).toBeDefined();
+                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
+                    expect(controller.totalDuration()).toEqual(20272);
+                });
+
             });
 
             describe("screenshot navigation", function () {
