@@ -396,6 +396,7 @@ add the following to columnSettings (values are in milliseconds scale):
      }     
   });
 ```
+For all possible values for `showTotalDurationIn` and `totalDurationFormat` refer to the wiki entry [Options for showing total duration of e2e test](https://github.com/Evilweed/protractor-beautiful-reporter/wiki/Options-for-showing-total-duration-of-e2e-test)
 
 
 ### Load spec results via ajax
