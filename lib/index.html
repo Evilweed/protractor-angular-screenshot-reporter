@@ -40,7 +40,7 @@
         </button>
     </div>
 </h2>
-
+<div class="bh-total-duration" ng-if="ctrl.showTotalDurationIn==='belowHeader'" ><span>Duration {{ ctrl.totalDuration() | timeFormat:ctrl.totalDurationFormat }}</span></div>
 <!-- Pass/Fail counts -->
 <div class="progress progress-striped">
     <div class="progress-bar progress-bar-success" ng-if="ctrl.passCount()" data-container="body" data-toggle="tooltip"
