@@ -1,7 +1,4 @@
 
-const appPatcher= require('./tests/app-patcher');
-appPatcher(__dirname,'./lib/app.js', './tests/app/test_data.js', './tmp/tests/lib/app.js');
-
 module.exports = function (config) {
     config.set({
 
@@ -21,7 +18,7 @@ module.exports = function (config) {
             'lib/assets/jquery.min.js',
             'lib/assets/bootstrap.min.js',
             'lib/assets/buttons.js',
-            'tmp/tests/lib/app.js',
+            'lib/app.js',
             'tests/app/test_data.js',
             'tests/app/time_data.js',
             'tests/app/app_test.js'
@@ -35,7 +32,7 @@ module.exports = function (config) {
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors:config.cc?{
-            'tmp/tests/lib/app.js': ['coverage']
+            'lib/app.js': ['coverage']
         }:{},
 
 

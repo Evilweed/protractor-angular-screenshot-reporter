@@ -15,24 +15,21 @@ describe('unit tests', function () {
         }));
         describe('ScreenshotReportController', function () {
             describe("core functions", function () {
-
+                var controller;
+                var $scope;
+                beforeEach(function () {
+                    $scope = $rootScope.$new();
+                    controller = $controller('ScreenshotReportController', {$scope: $scope});
+                });
                 it('can be instantiated without errors', function () {
-                    var $scope = $rootScope.$new();
-                    expect($scope).toBeDefined();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
                     expect(controller).toBeDefined();
                 });
 
                 it('searchSettings are defined', function () {
-                    var $scope = $rootScope.$new();
-                    expect($scope).toBeDefined();
-                    $controller('ScreenshotReportController', {$scope: $scope});
                     expect($scope.searchSettings).toBeDefined();
                 });
 
                 it('chooseAllTypes inverts selection', function () {
-                    var $scope = $rootScope.$new();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
                     $scope.searchSettings.allselected = false;
                     $scope.searchSettings.passed = false;
                     $scope.searchSettings.failed = false;
@@ -45,7 +42,6 @@ describe('unit tests', function () {
                 });
 
                 it('isArray detects only real arrays', function () {
-                    var controller = $controller('ScreenshotReportController', {$scope: {}});
                     var nuul = null;
                     var boool = true;
                     var nuumber = 1;
@@ -60,7 +56,6 @@ describe('unit tests', function () {
                 });
 
                 it('round is robust against initial values like undefined or null', function () {
-                    var controller = $controller('ScreenshotReportController', {$scope: {}});
                     //the round function devides by 1000 to get from milliseconds to seconds
                     expect(controller.round(null)).toEqual('NaN');
                     expect(controller.round(undefined)).toEqual('NaN');
@@ -78,7 +73,6 @@ describe('unit tests', function () {
                 });
 
                 it('round converts milliseconds to seconds as expected', function () {
-                    var controller = $controller('ScreenshotReportController', {$scope: {}});
                     //the round function devides by 1000 to get from milliseconds to seconds
                     expect(controller.round('1000')).toEqual('1');
                     expect(controller.round('1000.9999')).toEqual('1');
@@ -89,8 +83,6 @@ describe('unit tests', function () {
                 });
 
                 it('convertTimestamp handles all AM/PM cases in TZ ' + tzOffset, function () {
-                    var $scope = $rootScope.$new();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
 
                     expect(timeData).toBeDefined();
                     var refSet = timeData[tzOffset]; // timezoneoffset
@@ -210,6 +202,14 @@ describe('unit tests', function () {
 
             describe("reporting functions", function () {
 
+                var $scope;
+                var controller;
+                beforeEach(function () {
+                    $scope = $rootScope.$new();
+                    controller = $controller('ScreenshotReportController', {$scope: $scope});
+                    controller.results = referenceTestResults;
+                });
+
                 it('testData are present and sane', function () {
                     //global variable defined in test_data.js
                     expect(referenceTestResults).toBeDefined();
@@ -217,80 +217,63 @@ describe('unit tests', function () {
                 });
 
                 it('check counters', function () {
-                    var $scope = $rootScope.$new();
-                    expect($scope).toBeDefined();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
                     expect(controller.passCount()).toEqual(5);
                     expect(controller.pendingCount()).toEqual(4);
                     expect(controller.failCount()).toEqual(3);
                 });
 
                 it('check percents', function () {
-                    var $scope = $rootScope.$new();
-                    expect($scope).toBeDefined();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
                     expect(Math.trunc(controller.passPerc())).toEqual(41);
                     expect(Math.trunc(controller.pendingPerc())).toEqual(33);
                     expect(Math.trunc(controller.failPerc())).toEqual(25);
                 });
 
                 it('sortingFunctions do not throw', function () {
-                    var $scope = $rootScope.$new();
-                    expect($scope).toBeDefined();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
                     controller.sortSpecs();
                 });
 
-                it('check total duration', function () {
-                    var $scope = $rootScope.$new();
-                    expect($scope).toBeDefined();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
+                it('check calculation of total duration', function () {
                     expect(controller.totalDuration()).toEqual(20272);
                 });
-
             });
 
             describe("screenshot navigation", function () {
 
-                it('getNextScreenshot gives index of next available item with screenshot (start)', function () {
+                var controller;
+                beforeEach(function () {
                     var $scope = $rootScope.$new();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
+                    controller = $controller('ScreenshotReportController', {$scope: $scope});
+                    controller.results = referenceTestResults;
+                });
+
+                it('getNextScreenshot gives index of next available item with screenshot (start)', function () {
                     var nextIdx = controller.getNextScreenshotIdx(0);
                     expect(nextIdx).toEqual(2);
                 });
                 it('getNextScreenshot gives index of next available item with screenshot (mid)', function () {
-                    var $scope = $rootScope.$new();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
                     var nextIdx = controller.getNextScreenshotIdx(2);
                     expect(nextIdx).toEqual(9);
                 });
                 it('getNextScreenshot gives current index if no next screenshot available (end)', function () {
-                    var $scope = $rootScope.$new();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
                     var nextIdx = controller.getNextScreenshotIdx(9);
                     expect(nextIdx).toEqual(9);
                 });
 
                 it('getPreviousScreenshotIdx gives index of previous available item with screenshot (end)', function () {
-                    var $scope = $rootScope.$new();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
                     var nextIdx = controller.getPreviousScreenshotIdx(9);
                     expect(nextIdx).toEqual(2);
                 });
                 it('getPreviousScreenshotIdx gives index of previous available item with screenshot (mid)', function () {
-                    var $scope = $rootScope.$new();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
                     var nextIdx = controller.getPreviousScreenshotIdx(2);
                     expect(nextIdx).toEqual(0);
                 });
                 it('getPreviousScreenshotIdx gives current index if no previous screenshot available (start)', function () {
-                    var $scope = $rootScope.$new();
-                    var controller = $controller('ScreenshotReportController', {$scope: $scope});
                     var nextIdx = controller.getPreviousScreenshotIdx(0);
                     expect(nextIdx).toEqual(0);
                 });
 
             });
+
         });
 
 
@@ -366,70 +349,70 @@ describe('unit tests', function () {
         }));
         describe('PbrScreenshotModalController', function () {
             beforeEach(function () {
-               // $rootScope.showSmartStackTraceHighlight = true;
+                // $rootScope.showSmartStackTraceHighlight = true;
             });
 
             describe('Previous Next', function () {
 
                 it('can be instantiated without errors', function () {
-                    var bindings = {index: 0, data: {}, next:1, previous:0, hasNext:true,hasPrevious:false };
+                    var bindings = {index: 0, data: {}, next: 1, previous: 0, hasNext: true, hasPrevious: false};
                     var controller = $controller('pbrScreenshotModal', null, bindings);
                     expect(controller).toBeDefined();
                 });
 
                 it('updateselectedModal shows next when arrow right pressed', function () {
-                    var bindings = {index: 0, data: {}, next:2, previous:0, hasNext:true, hasPrevious:false };
+                    var bindings = {index: 0, data: {}, next: 2, previous: 0, hasNext: true, hasPrevious: false};
                     var controller = $controller('pbrScreenshotModal', null, bindings);
-                    spyOn(controller,"showHideModal");
-                    controller.updateSelectedModal({key:"ArrowRight"},0);
-                    expect(controller.showHideModal).toHaveBeenCalledWith(0,2);
+                    spyOn(controller, "showHideModal");
+                    controller.updateSelectedModal({key: "ArrowRight"}, 0);
+                    expect(controller.showHideModal).toHaveBeenCalledWith(0, 2);
                 });
 
                 it('updateselectedModal shows next when arrow right pressed (has only keyCode)', function () {
-                    var bindings = {index: 0, data: {}, next:2, previous:0, hasNext:true, hasPrevious:false };
+                    var bindings = {index: 0, data: {}, next: 2, previous: 0, hasNext: true, hasPrevious: false};
                     var controller = $controller('pbrScreenshotModal', null, bindings);
-                    spyOn(controller,"showHideModal");
-                    controller.updateSelectedModal({keyCode:39},0);
-                    expect(controller.showHideModal).toHaveBeenCalledWith(0,2);
+                    spyOn(controller, "showHideModal");
+                    controller.updateSelectedModal({keyCode: 39}, 0);
+                    expect(controller.showHideModal).toHaveBeenCalledWith(0, 2);
                 });
 
                 it('updateselectedModal ignores arrow right when no next screenshot available', function () {
-                    var bindings = {index: 0, data: {}, next:2, previous:0, hasNext:false, hasPrevious:false };
+                    var bindings = {index: 0, data: {}, next: 2, previous: 0, hasNext: false, hasPrevious: false};
                     var controller = $controller('pbrScreenshotModal', null, bindings);
-                    spyOn(controller,"showHideModal");
-                    controller.updateSelectedModal({key:"ArrowRight"},0);
+                    spyOn(controller, "showHideModal");
+                    controller.updateSelectedModal({key: "ArrowRight"}, 0);
                     expect(controller.showHideModal).not.toHaveBeenCalled();
                 });
 
                 it('updateselectedModal shows previous when arrow left pressed', function () {
-                    var bindings = {index: 2, data: {}, next:2, previous:0, hasNext:false, hasPrevious:true };
+                    var bindings = {index: 2, data: {}, next: 2, previous: 0, hasNext: false, hasPrevious: true};
                     var controller = $controller('pbrScreenshotModal', null, bindings);
-                    spyOn(controller,"showHideModal");
-                    controller.updateSelectedModal({key:"ArrowLeft"},2);
-                    expect(controller.showHideModal).toHaveBeenCalledWith(2,0);
+                    spyOn(controller, "showHideModal");
+                    controller.updateSelectedModal({key: "ArrowLeft"}, 2);
+                    expect(controller.showHideModal).toHaveBeenCalledWith(2, 0);
                 });
 
                 it('updateselectedModal shows previous when arrow left pressed (has only keyCode)', function () {
-                    var bindings = {index: 2, data: {}, next:2, previous:0, hasNext:false, hasPrevious:true };
+                    var bindings = {index: 2, data: {}, next: 2, previous: 0, hasNext: false, hasPrevious: true};
                     var controller = $controller('pbrScreenshotModal', null, bindings);
-                    spyOn(controller,"showHideModal");
-                    controller.updateSelectedModal({keyCode:37},2);
-                    expect(controller.showHideModal).toHaveBeenCalledWith(2,0);
+                    spyOn(controller, "showHideModal");
+                    controller.updateSelectedModal({keyCode: 37}, 2);
+                    expect(controller.showHideModal).toHaveBeenCalledWith(2, 0);
                 });
 
                 it('updateselectedModal ignores arrow left when no previous screenshot available', function () {
-                    var bindings = {index: 0, data: {}, next:2, previous:0, hasNext:true, hasPrevious:false };
+                    var bindings = {index: 0, data: {}, next: 2, previous: 0, hasNext: true, hasPrevious: false};
                     var controller = $controller('pbrScreenshotModal', null, bindings);
-                    spyOn(controller,"showHideModal");
-                    controller.updateSelectedModal({key:"ArrowLeft"},0);
+                    spyOn(controller, "showHideModal");
+                    controller.updateSelectedModal({key: "ArrowLeft"}, 0);
                     expect(controller.showHideModal).not.toHaveBeenCalled();
                 });
 
                 it('showHideModal calls $.modal hide and show', function () {
-                    var bindings = {index: 2, data: {}, next:9, previous:0, hasNext:true, hasPrevious:true };
+                    var bindings = {index: 2, data: {}, next: 9, previous: 0, hasNext: true, hasPrevious: true};
                     var controller = $controller('pbrScreenshotModal', null, bindings);
-                    spyOn($.fn,"modal");
-                    controller.showHideModal(2,9);
+                    spyOn($.fn, "modal");
+                    controller.showHideModal(2, 9);
                     expect($.fn.modal).toHaveBeenCalledWith("hide");
                     expect($.fn.modal).toHaveBeenCalledWith("show");
                 });
@@ -633,6 +616,111 @@ describe('unit tests', function () {
                 var filter = $filter('bySearchSettings');
                 var fResults = filter(referenceTestResults, settings);
                 expect(fResults.length).toEqual(0);
+            });
+
+        });
+
+    });
+
+    describe('timeFormat filter', function () {
+
+        beforeEach(function () {
+            module("reportingApp");
+        });
+        var $filter;
+
+        beforeEach(inject(function (_$filter_) {
+            $filter = _$filter_;
+        }));
+
+        var totalDuration = 0;
+        beforeAll(function () {
+            testDataBackup = referenceTestResults.slice();
+            totalDuration = 0;
+            for (var i = 0; i < referenceTestResults.length; i++) {
+                if (referenceTestResults[i].duration) {
+                    totalDuration += referenceTestResults[i].duration;
+                }
+            }
+
+        });
+
+        afterEach(function () {
+            referenceTestResults = testDataBackup.slice();
+        });
+
+        describe("formatting cases", function () {
+
+            it('testDataBackup is ok', function () {
+                expect(testDataBackup).toBeDefined();
+                expect(testDataBackup.length).toEqual(12);
+                expect(totalDuration).toEqual(20272);
+            });
+
+            it('format with null', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(null, 'h')).toEqual("NaN");
+            });
+
+
+            it('h format', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration * 1000, 'h')).toEqual("5.63h");
+            });
+
+            it('m format', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration * 1000, 'm')).toEqual("337.87min");
+            });
+
+            it('s format', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration, 's')).toEqual("20.27s");
+            });
+
+            it('hm format', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration * 1000, 'hm')).toEqual("5h 37.87min");
+            });
+
+            it('h:m format', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration * 1000, 'h:m')).toEqual("5:38");
+            });
+
+            it('h:m format w zero in min', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration * 1000 - (30 * 60 * 1000), 'h:m')).toEqual("5:08");
+            });
+
+            it('hms format', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration * 1000 + 40, 'hms')).toEqual("5h 37min 52.04s");
+            });
+
+            it('h:m:s format', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration * 1000 + 4, 'h:m:s')).toEqual("5:37:52");
+            });
+
+            it('h:m:s format w zero in min', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration * 1000 - (30 * 60 * 1000), 'h:m:s')).toEqual("5:07:52");
+            });
+
+            it('h:m:s format w zero in s', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration * 1000 - (50 * 1000), 'h:m:s')).toEqual("5:37:02");
+            });
+
+            it('ms format lower than 1min', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration, 'ms')).toEqual("0min 20.27s");
+            });
+
+            it('ms format greater than 1min', function () {
+                var filter = $filter('timeFormat');
+                expect(filter(totalDuration + 12 * 60 * 1000, 'ms')).toEqual("12min 20.27s");
             });
 
         });

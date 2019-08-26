@@ -11,7 +11,7 @@
     "app:compile": "node --max_old_space_size=5760 ./node_modules/webpack/bin/webpack.js --config ./webpack.config.js",
     "prepare": "npm run app:compile",
     "test": "npm run test-app && npm run test-reporter",
-    "test-app": "node karma.pre.js && karma start karma.conf.js",
+    "test-app": "karma start karma.conf.js",
     "test-app-coverage": "karma start karma.conf.js --cc=true",
     "test-reporter": "node tests/jasmine.runner.js",
     "test-reporter-watch": "node node_modules/nodemon/bin/nodemon.js -w tests/reporter/*_test.js -w app/*.js node tests/jasmine.runner.js",
