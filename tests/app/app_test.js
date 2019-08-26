@@ -17,7 +17,7 @@ describe('unit tests', function () {
             describe("core functions", function () {
                 var controller;
                 var $scope;
-                beforeEach(function () {
+                beforeEach(function(){
                     $scope = $rootScope.$new();
                     controller = $controller('ScreenshotReportController', {$scope: $scope});
                 });
@@ -204,10 +204,10 @@ describe('unit tests', function () {
 
                 var $scope;
                 var controller;
-                beforeEach(function () {
+                beforeEach(function(){
                     $scope = $rootScope.$new();
                     controller = $controller('ScreenshotReportController', {$scope: $scope});
-                    controller.results = referenceTestResults;
+                    controller.results=referenceTestResults;
                 });
 
                 it('testData are present and sane', function () {
@@ -240,7 +240,7 @@ describe('unit tests', function () {
             describe("screenshot navigation", function () {
 
                 var controller;
-                beforeEach(function () {
+                beforeEach(function(){
                     var $scope = $rootScope.$new();
                     controller = $controller('ScreenshotReportController', {$scope: $scope});
                     controller.results = referenceTestResults;
@@ -270,6 +270,24 @@ describe('unit tests', function () {
                 it('getPreviousScreenshotIdx gives current index if no previous screenshot available (start)', function () {
                     var nextIdx = controller.getPreviousScreenshotIdx(0);
                     expect(nextIdx).toEqual(0);
+                });
+
+                it('hasNextScreenshot returns true if next item available ', function () {
+                    var nextIdx = controller.hasNextScreenshot(0);
+                    expect(nextIdx).toEqual(true);
+                });
+                it('hasNextScreenshot returns false if no next item available ', function () {
+                    var nextIdx = controller.hasNextScreenshot(9);
+                    expect(nextIdx).toEqual(false);
+                });
+
+                it('hasPreviousScreenshot returns true if previous item available ', function () {
+                    var nextIdx = controller.hasPreviousScreenshot(9);
+                    expect(nextIdx).toEqual(true);
+                });
+                it('hasPreviousScreenshot returns false if no previous item available ', function () {
+                    var nextIdx = controller.hasPreviousScreenshot(0);
+                    expect(nextIdx).toEqual(false);
                 });
 
             });
@@ -649,7 +667,9 @@ describe('unit tests', function () {
             referenceTestResults = testDataBackup.slice();
         });
 
+
         describe("formatting cases", function () {
+
 
             it('testDataBackup is ok', function () {
                 expect(testDataBackup).toBeDefined();
@@ -661,8 +681,6 @@ describe('unit tests', function () {
                 var filter = $filter('timeFormat');
                 expect(filter(null, 'h')).toEqual("NaN");
             });
-
-
             it('h format', function () {
                 var filter = $filter('timeFormat');
                 expect(filter(totalDuration * 1000, 'h')).toEqual("5.63h");
@@ -675,7 +693,7 @@ describe('unit tests', function () {
 
             it('s format', function () {
                 var filter = $filter('timeFormat');
-                expect(filter(totalDuration, 's')).toEqual("20.27s");
+                expect(filter(totalDuration , 's')).toEqual("20.27s");
             });
 
             it('hm format', function () {
@@ -690,7 +708,7 @@ describe('unit tests', function () {
 
             it('h:m format w zero in min', function () {
                 var filter = $filter('timeFormat');
-                expect(filter(totalDuration * 1000 - (30 * 60 * 1000), 'h:m')).toEqual("5:08");
+                expect(filter(totalDuration * 1000-(30*60*1000), 'h:m')).toEqual("5:08");
             });
 
             it('hms format', function () {
@@ -705,12 +723,12 @@ describe('unit tests', function () {
 
             it('h:m:s format w zero in min', function () {
                 var filter = $filter('timeFormat');
-                expect(filter(totalDuration * 1000 - (30 * 60 * 1000), 'h:m:s')).toEqual("5:07:52");
+                expect(filter(totalDuration * 1000-(30*60*1000), 'h:m:s')).toEqual("5:07:52");
             });
 
             it('h:m:s format w zero in s', function () {
                 var filter = $filter('timeFormat');
-                expect(filter(totalDuration * 1000 - (50 * 1000), 'h:m:s')).toEqual("5:37:02");
+                expect(filter(totalDuration * 1000-(50*1000), 'h:m:s')).toEqual("5:37:02");
             });
 
             it('ms format lower than 1min', function () {
@@ -722,7 +740,6 @@ describe('unit tests', function () {
                 var filter = $filter('timeFormat');
                 expect(filter(totalDuration + 12 * 60 * 1000, 'ms')).toEqual("12min 20.27s");
             });
-
         });
 
     });
