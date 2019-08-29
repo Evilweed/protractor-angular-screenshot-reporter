@@ -1,6 +1,9 @@
 var util = require('./util'),
     _ = require('underscore'),
     path = require('path');
+const os = require('os');
+var fs = require('fs');
+const fse = require('fs-extra');
 
 /** Function: defaultPathBuilder
  * This function builds paths for a screenshot file. It is appended to the
@@ -224,17 +227,12 @@ function expectFailed(rep) {
         var self = rep;
 
         if (!passed && self._screenshotReporter.screenshotOnFailure) {
-            let baseName = self._screenshotReporter.pathBuilder(
-                null,
-                [expectation.message],
-                null,
-                null
-            );
+            let baseName = os.tmpdir();
             let gUid = util.generateGuid();
             let screenShotFileName = path.basename(gUid + '.png');
-            let screenShotFilePath = path.join(path.dirname(baseName + '.png'), self._screenshotReporter.screenshotsSubfolder);
-            let screenShotPath = path.join(self._screenshotReporter.baseDirectory, screenShotFilePath, screenShotFileName);
-            self._screenshotReporter.screenshotArray.push(path.join(self._screenshotReporter.screenshotsSubfolder, screenShotFileName));
+            let screenShotFilePath = path.join(baseName, self._screenshotReporter.screenshotsSubfolder);
+            let screenShotPath = path.join(screenShotFilePath, screenShotFileName);
+            self._screenshotReporter.screenshotArray.push(screenShotPath);
             try {
                 browser.takeScreenshot().then(png => {
                     util.storeScreenShot(png, screenShotPath);
@@ -379,9 +377,23 @@ class Jasmine2Reporter {
         let considerScreenshot = !(this._screenshotReporter.takeScreenShotsOnlyForFailedSpecs && result.status === 'passed')
 
         if (considerScreenshot) {
-            this._screenshotReporter.screenshotArray.push(path.join(this._screenshotReporter.screenshotsSubfolder, screenShotFileName));
-            metaData.screenShotFile = [...this._screenshotReporter.screenshotArray];
-            this._screenshotReporter.screenshotArray.length = 0;
+            fse.ensureDir(path.join(this._screenshotReporter.baseDirectory, screenShotFilePath)).then(()=>{
+                for(let i = 0; i<this._screenshotReporter.screenshotArray.length;i++){
+                    let tmpFilePath = this._screenshotReporter.screenshotArray.pop();
+                    let fileName = tmpFilePath.replace(/^.*[\\\/]/, '');
+                    let newScreenshotFilePath = path.join(this._screenshotReporter.baseDirectory, screenShotFilePath, fileName);
+                    let newFilePath = path.join(this._screenshotReporter.screenshotsSubfolder, fileName);
+                    fs.rename(tmpFilePath,newScreenshotFilePath, err => {
+                        if(err){throw err};   
+                    });
+                    this._screenshotReporter.screenshotArray.unshift(newFilePath);
+                }
+                this._screenshotReporter.screenshotArray.push(path.join(this._screenshotReporter.screenshotsSubfolder, screenShotFileName));
+                metaData.screenShotFile = [...this._screenshotReporter.screenshotArray];
+                this._screenshotReporter.screenshotArray.length = 0;
+            }).catch(err=>{
+                console.log(err);
+            });            
         }
 
         if (result.browserLogs) {
