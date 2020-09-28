@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const CircularJSON = require('circular-json');
 const fse = require('fs-extra');
 
 function getTag(value) {
@@ -197,13 +196,13 @@ function addMetaData(test, baseName, options) {
             data = JSON.parse(fse.readJsonSync(file), {encoding: 'utf8'});
         } else {
             fse.ensureFileSync(file);
-            fse.outputJsonSync(file, CircularJSON.stringify([]));
+            fse.outputJsonSync(file, JSON.stringify([]));
             data = JSON.parse(fse.readJsonSync(file), {encoding: 'utf8'});
         }
 
         data.push(test);
 
-        fse.outputJsonSync(file, CircularJSON.stringify(data));
+        fse.outputJsonSync(file, JSON.stringify(data));
 
         addHTMLReport(data, baseName, options);
 

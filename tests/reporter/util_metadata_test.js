@@ -1,7 +1,6 @@
 const util = require('../../app/util');
 const fs = require('fs');
 const fse = require('fs-extra');
-const path = require('path');
 
 const testResults = require('./test_data');
 
@@ -262,6 +261,87 @@ describe('unit tests', () => {
                     expect(console.error).not.toHaveBeenCalled();
                 });
 
+                it('checks that stringifyed content is as expected', () => {
+                    const fakePath = "./not/existing/path/" + util.generateGuid() + "/subdir";
+                    const metaData1 = { 'first' : 'value1' };
+                    const metaData2 = {
+                        'second': 'value2',
+                        'embed':
+                            {
+                                'embedded': 'innerValue',
+                                'embedded2': 'innerValue2'
+                            }
+                    };
+                    let step = 0;
+
+                    //region mocks
+
+                    // for addMetaData
+                    spyOn(fse, "ensureFileSync").and.stub();
+                    spyOn(fs, "rmdirSync").and.stub();
+                    spyOn(fs, "mkdirSync").and.stub();
+                    spyOn(fse, "readJsonSync").and.callFake(() => {
+                        step ++;
+                        switch (step) {
+                            case 1:
+                                return "[]";
+                            case 2:
+                                return "[" + JSON.stringify(metaData1) + "]";
+                            default:
+                                fail('Unexpected step');
+                        }
+                    });
+
+                    let step1RegisteredMetaData = '';
+                    let step2RegisteredMetaData = '';
+                    spyOn(fse, "outputJsonSync").and.callFake((fpath, stringifyedContent) => {
+                        switch (step) {
+                            case 1:
+                                step1RegisteredMetaData = stringifyedContent;
+                                break;
+                            case 2:
+                                step2RegisteredMetaData = stringifyedContent;
+                                break;
+                            default:
+                                fail('Unexpected step');
+                        }
+                    });
+
+                    spyOn(fse, 'pathExistsSync').and.callFake((fpath) => {
+                        return true;
+                    });
+
+                    // for addHTMLReport
+                    spyOn(fse, 'copySync').and.stub();
+                    spyOn(fs, 'readFileSync').and.returnValue(
+                        function () {
+                            this.toString = function () {
+                                return "";
+                            };
+                        }
+                    );
+                    spyOn(fs, 'createWriteStream').and.returnValue({
+                        write: jasmine.createSpy('write'),
+                        end: jasmine.createSpy('end')
+                    });
+
+                    // misc
+                    spyOn(console, 'error').and.stub();
+                    //end region mocks
+
+                    const options = {
+                        docName: "report.html",
+                        sortFunction: defaultSortFunction
+                    };
+
+                    // Add meta data twice to ensure they are aggregated
+                    util.addMetaData(metaData1, fakePath, options);
+                    util.addMetaData(metaData2, fakePath, options);
+
+                    expect(console.error).not.toHaveBeenCalled();
+                    expect(step1RegisteredMetaData).toBe('[{"first":"value1"}]');
+                    expect(step2RegisteredMetaData).toBe('[{"first":"value1"},{"second":"value2","embed":{"embedded":"innerValue","embedded2":"innerValue2"}}]');
+                });
 
             });
 
